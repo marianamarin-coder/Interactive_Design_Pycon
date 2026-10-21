@@ -18,6 +18,7 @@
     --ink: #10292B;          /* texto principal: 15:1 sobre crema */
     --muted: #4C5E60;        /* texto secundario: 6.6:1 sobre crema */
     --sky: #DDF3EE;
+    --glass-fill: rgba(255, 253, 247, .74);   /* vidrio sobre el recorrido 3D */
 
     --font: 'Poppins', system-ui, -apple-system, 'Segoe UI', sans-serif;
 
@@ -65,84 +66,59 @@ button { font: inherit; color: inherit; }
 :focus-visible { outline: 3px solid var(--orange); outline-offset: 3px; }
 
 /* =========================================================================
-   ESCENA PARALLAX
+   RECORRIDO 3D (Three.js · tour3d.js)
+   El canvas queda fijo detrás de todo; el contenido se lee siempre sobre
+   superficies opacas o vidrio denso, nunca directo sobre la escena.
    ========================================================================= */
-.scene {
-    position: fixed; inset: 0; z-index: 0; overflow: hidden;
-    background: linear-gradient(var(--tint-sky, #E6F7F3), var(--tint, #CFEBD9));
-    pointer-events: none;
+.tour {
+    position: fixed; left: 0; top: 0; z-index: 0; width: 100%; height: 100vh; height: 100lvh;
+    overflow: hidden; pointer-events: none;
+    /* mientras carga (o sin WebGL): el mismo atardecer del recorrido */
+    background: linear-gradient(180deg, #7CA6D8 0%, #E4CFCB 32%, #FFDAAA 48%, #A3A672 58%, #4D6A3B 74%, #1E3822 100%);
 }
-.stage { position: absolute; opacity: 0; transition: opacity .9s ease; }
-.scene-ready .stage { opacity: 1; }
+.tour__canvas {
+    position: absolute; inset: 0; width: 100%; height: 100%; display: block;
+    opacity: 0; transition: opacity 1.4s ease;
+    /* gradación de los renders de Blender: un poco más de saturación y contraste */
+    filter: saturate(1.25) contrast(1.06);
+}
+.tour.is-ready .tour__canvas { opacity: 1; }
 
-.layer { position: absolute; inset: 0; will-change: transform; }
-.layer > img { width: 100%; height: 100%; }
-
-/* Tinte de atardecer/noche: la misma imagen de la capa sirve de máscara,
-   así solo se colorean sus píxeles pintados (multiplicar con blanco = sin cambio) */
-.layer[style*="--img"]::after {
-    content: ""; position: absolute; inset: 0; pointer-events: none;
-    background: var(--tint, #fff); mix-blend-mode: multiply;
-    -webkit-mask: var(--img) center / 100% 100% no-repeat;
-    mask: var(--img) center / 100% 100% no-repeat;
-}
-.layer--sky::after { background: linear-gradient(var(--tint-sky, #fff), var(--tint, #fff)) !important; }
-
-/* La niebla del PSD estaba en modo "Aclarar"; de noche se disipa */
-.layer--mist { mix-blend-mode: lighten; opacity: calc(1 - var(--night, 0) * .8); }
-.layer--mist img { animation: mist-drift 22s ease-in-out infinite alternate; }
-.layer--sun img {
-    animation: sun-breathe 7s ease-in-out infinite; transform-origin: 73% 22%;
-    translate: 0 calc(var(--sun-down, 0) * 30%);
-    opacity: calc(1 - var(--night, 0) * 1.2);
-}
-.layer--butterfly { opacity: calc(1 - var(--night, 0)); }
-
-/* Estrellas, luna y luciérnagas (aparecen con la noche) */
-.layer--stars { opacity: calc(var(--night, 0) * 1.1 - .1); }
-.layer--stars i {
-    position: absolute; width: var(--s); height: var(--s); border-radius: 50%; background: #FFF8E1;
-    box-shadow: 0 0 6px rgba(255, 248, 225, .9); opacity: var(--o);
-    animation: twinkle var(--d) ease-in-out infinite alternate;
-}
-.moon {
-    position: absolute; left: 30%; top: 12%; width: 4.2%; aspect-ratio: 1; border-radius: 50%;
-    background: radial-gradient(circle at 38% 36%, #FFFDF2, #F4EBC8 60%, #E2D49E);
-    box-shadow: 0 0 40px 12px rgba(255, 246, 210, .45), 0 0 120px 40px rgba(180, 200, 255, .25);
-    opacity: var(--night, 0);
-    translate: 0 calc((1 - var(--night, 0)) * 140%);
-}
-.moon::after { content: ""; position: absolute; inset: 22% 50% 50% 24%; border-radius: 50%; background: rgba(205, 192, 140, .45); box-shadow: 1.2vw .8vw 0 -.2vw rgba(205, 192, 140, .35); }
-.layer--fireflies { opacity: var(--night, 0); }
-.layer--fireflies i {
-    position: absolute; width: 6px; height: 6px; border-radius: 50%; background: #F7F3A1;
-    box-shadow: 0 0 10px 4px rgba(247, 243, 161, .75);
-    animation: firefly var(--d) ease-in-out var(--delay) infinite;
+/* Velo de lectura: bruma clara detrás del logo (se disipa al bajar, --hero)
+   y viñeta suave en los bordes para que el centro respire */
+.tour__veil {
+    position: absolute; inset: 0;
+    background:
+        radial-gradient(62% 46% at 50% 33%, rgba(255, 249, 238, calc(var(--hero, 1) * .62)), rgba(255, 249, 238, calc(var(--hero, 1) * .2)) 58%, rgba(255, 249, 238, 0) 78%),
+        radial-gradient(130% 95% at 50% 42%, rgba(8, 26, 20, 0) 52%, rgba(8, 26, 20, .42) 100%);
 }
 
-/* Mariposa recortada del marco para animarla: aleteo + vuelo corto */
-.butterfly {
-    position: absolute; left: 15.1%; top: 48.15%; width: 7.29%;
-    animation: butterfly-path 11s ease-in-out infinite;
+/* Aviso de carga del modelo: pequeño, abajo a la izquierda, no bloquea la página
+   (doble clase para ganarle al position: relative de .glass) */
+.tour-status.glass {
+    position: fixed; left: 16px; bottom: 16px; z-index: 45; max-width: calc(100vw - 100px);
+    display: flex; align-items: center; gap: 12px; margin: 0;
+    padding: 9px 16px; border-radius: var(--radius-pill);
+    font-size: .82rem; font-weight: 600; line-height: 1.3; color: var(--ink);
+    transition: opacity .5s ease, transform .5s ease, visibility 0s;
 }
-.butterfly img { width: 100%; height: auto; transform-origin: 62% 55%; animation: flap .32s ease-in-out infinite alternate; }
+.tour-status__bar { flex: none; width: 64px; height: 4px; border-radius: 4px; background: rgba(16, 41, 43, .16); overflow: hidden; }
+.tour-status__bar i { display: block; height: 100%; background: var(--teal-btn); transform-origin: left; transform: scaleX(var(--p, 0)); transition: transform .25s; }
+.tour-status.is-error .tour-status__bar { display: none; }
+.tour-status.is-done { opacity: 0; transform: translateY(12px); visibility: hidden; transition: opacity .5s ease, transform .5s ease, visibility 0s .5s; }
 
-
-@keyframes mist-drift { from { transform: translateX(-1.2%); } to { transform: translateX(1.2%); } }
-@keyframes sun-breathe { 0%, 100% { scale: 1; } 50% { scale: 1.05; } }
-@keyframes twinkle { from { opacity: calc(var(--o) * .35); } to { opacity: var(--o); } }
-@keyframes firefly {
-    0%, 100% { transform: translate(0, 0); opacity: 0; }
-    20% { opacity: 1; }
-    50% { transform: translate(var(--dx), var(--dy)); opacity: .9; }
-    80% { opacity: .2; }
+@media (max-aspect-ratio: 1/1) {
+    .tour__veil {
+        background:
+            radial-gradient(95% 34% at 50% 26%, rgba(255, 249, 238, calc(var(--hero, 1) * .62)), rgba(255, 249, 238, calc(var(--hero, 1) * .2)) 60%, rgba(255, 249, 238, 0) 80%),
+            linear-gradient(0deg, rgba(10, 32, 22, .5) 0%, rgba(10, 32, 22, 0) 40%),
+            radial-gradient(140% 90% at 50% 40%, rgba(8, 26, 20, 0) 55%, rgba(8, 26, 20, .38) 100%);
+    }
 }
-@keyframes flap { from { transform: scaleX(1); } to { transform: scaleX(.45); } }
-@keyframes butterfly-path {
-    0%, 100% { transform: translate(0, 0) rotate(0); }
-    25% { transform: translate(40%, -55%) rotate(-8deg); }
-    50% { transform: translate(110%, -20%) rotate(6deg); }
-    75% { transform: translate(45%, 30%) rotate(-4deg); }
+@media (max-width: 720px) {
+    /* en el móvil el aviso queda centrado, por encima de "Explora la selva" */
+    .tour-status.glass { left: 50%; bottom: 84px; translate: -50% 0; max-width: calc(100vw - 32px); font-size: .75rem; padding: 7px 12px; gap: 8px; }
+    .tour-status__bar { width: 40px; }
 }
 
 /* =========================================================================
@@ -150,15 +126,17 @@ button { font: inherit; color: inherit; }
    Capa translúcida con desenfoque y saturación del fondo, bordes con luz
    especular y un brillo interior. En Chromium además se refracta el fondo
    con un filtro SVG de desplazamiento (#liquid-glass).
+   Sobre la escena 3D (cielo claro, selva oscura) el relleno es más denso:
+   el texto oscuro mantiene ≥ 7:1 aunque detrás pase el dosel más oscuro.
    ========================================================================= */
 .glass {
     position: relative;
     isolation: isolate;
     background:
-        linear-gradient(135deg, rgba(255, 255, 255, .55) 0%, rgba(255, 255, 255, .14) 42%, rgba(255, 255, 255, .06) 60%, rgba(255, 255, 255, .32) 100%),
-        rgba(255, 253, 247, .38);
-    -webkit-backdrop-filter: blur(14px) saturate(185%) brightness(1.06);
-    backdrop-filter: blur(14px) saturate(185%) brightness(1.06);
+        linear-gradient(135deg, rgba(255, 255, 255, .5) 0%, rgba(255, 255, 255, .1) 42%, rgba(255, 255, 255, .04) 60%, rgba(255, 255, 255, .26) 100%),
+        var(--glass-fill);
+    -webkit-backdrop-filter: blur(16px) saturate(160%) brightness(1.08);
+    backdrop-filter: blur(16px) saturate(160%) brightness(1.08);
     border: 1px solid rgba(255, 255, 255, .62);
     box-shadow:
         inset 0 1px 1px rgba(255, 255, 255, .95),
@@ -177,7 +155,7 @@ button { font: inherit; color: inherit; }
     .glass { background-color: rgba(255, 253, 247, .9); }
 }
 .has-refraction .glass--refract {
-    backdrop-filter: url(#liquid-glass) blur(5px) saturate(185%) brightness(1.06);
+    backdrop-filter: url(#liquid-glass) blur(8px) saturate(160%) brightness(1.08);
 }
 
 /* =========================================================================
@@ -262,7 +240,7 @@ button { font: inherit; color: inherit; }
     opacity: 0; transform: translateY(-140%); visibility: hidden;
     transition: opacity .45s ease, transform .55s cubic-bezier(.2, .9, .25, 1.15), visibility 0s .55s;
 }
-.site-header__bar.glass { background-color: rgba(255, 253, 247, calc(.4 + var(--night, 0) * .45)); }
+.site-header__bar.glass { --glass-fill: rgba(255, 253, 247, .82); }
 .is-scrolled .site-header__bar {
     opacity: 1; transform: none; visibility: visible; pointer-events: auto;
     transition: opacity .45s ease, transform .55s cubic-bezier(.2, .9, .25, 1.15), visibility 0s;
@@ -324,19 +302,17 @@ main { position: relative; z-index: 1; }
 }
 .hero__float { width: min(100%, 940px); display: flex; flex-direction: column; align-items: center; will-change: transform; }
 
+/* El logo flota (levitate + puntero en tour3d.js), sin sombras: la bruma del
+   velo (.tour__veil) es la que lo separa del cielo y del dosel */
 .hero__logo { position: relative; animation: levitate 6s ease-in-out infinite; }
 .logo {
     display: grid; grid-template-columns: auto auto; align-items: center; justify-content: center;
     column-gap: clamp(10px, 1.6vw, 22px); color: #12393D;
 }
-.logo__mark {
-    width: clamp(64px, 11vw, 136px); height: auto;
-    filter: drop-shadow(0 10px 18px rgba(16, 41, 43, .25));
-}
+.logo__mark { width: clamp(64px, 11vw, 136px); height: auto; }
 .logo__word {
     font-weight: 800; text-transform: uppercase; letter-spacing: -.045em; line-height: .86;
     font-size: clamp(4.4rem, 15vw, 11.5rem);
-    text-shadow: 0 2px 0 rgba(255, 255, 255, .55), 0 20px 50px rgba(255, 253, 247, .9);
 }
 .logo__sub {
     grid-column: 1 / -1; margin-top: .55em;
@@ -344,18 +320,9 @@ main { position: relative; z-index: 1; }
     padding-left: .42em; color: #12393D;
 }
 .logo__sub b { color: var(--teal-ink); }
-.hero__shadow {
-    position: absolute; left: 18%; right: 18%; bottom: -34px; height: 22px; border-radius: 50%;
-    background: radial-gradient(closest-side, rgba(16, 41, 43, .28), transparent);
-    animation: levitate-shadow 6s ease-in-out infinite;
-}
 @keyframes levitate {
     0%, 100% { transform: translateY(0) rotate(-.4deg); }
     50% { transform: translateY(-18px) rotate(.4deg); }
-}
-@keyframes levitate-shadow {
-    0%, 100% { transform: translateY(0) scale(1); opacity: 1; }
-    50% { transform: translateY(18px) scale(.78); opacity: .55; }
 }
 
 .hero__chips {

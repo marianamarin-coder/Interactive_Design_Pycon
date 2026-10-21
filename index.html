@@ -12,35 +12,35 @@
     <!-- Poppins: tipografía del Figma "botones y tarjetas pycon" -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
-    <link rel="preload" as="image" href="assets/layers/01-cielo.webp">
-    <link rel="preload" as="image" href="assets/layers/07-marco.webp">
+    <!-- Recorrido 3D: el modelo (9 MB, Draco) empieza a descargarse de inmediato -->
+    <link rel="preload" href="assets/3d/recorrido-amazonas.glb" as="fetch" type="model/gltf-binary" crossorigin>
     <link rel="stylesheet" href="styles.css">
+
+    <script type="importmap">
+    {
+        "imports": {
+            "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+            "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+        }
+    }
+    </script>
 </head>
 
 <body>
     <a class="skip-link" href="#contenido" data-i18n="skip">Saltar al contenido</a>
 
-    <!-- ===================== ESCENA PARALLAX (ilustración del PSD) =====================
-         Cada capa es una capa pintada del .psd, en el mismo orden (fondo → frente).
-         data-depth  = cuánto reacciona al mouse · data-scroll = cuánto se desplaza con el scroll
-         --img       = la misma imagen, usada como máscara para teñir la capa de atardecer y noche
+    <!-- ===================== RECORRIDO 3D (Three.js · tour3d.js) =====================
+         Escena de Blender (assets/3d/recorrido-amazonas.glb). El scroll mueve la cámara
+         animada del mirador al claro de la ceiba; cada sección marca su hito con data-tour.
+         El velo aclara el cielo detrás del logo y oscurece levemente los bordes.
     -->
-    <div class="scene" id="scene" aria-hidden="true">
-        <div class="stage" id="stage">
-            <div class="layer layer--sky" data-depth="0.04" data-scroll="0.10" style="--img:url(assets/layers/01-cielo.webp)"><img src="assets/layers/01-cielo.webp" alt="" decoding="async"></div>
-            <div class="layer layer--stars" data-depth="0.05" data-scroll="0.08" id="stars"></div>
-            <div class="layer layer--moon" data-depth="0.05" data-scroll="0"><span class="moon"></span></div>
-            <div class="layer layer--sun" data-depth="0.06" data-scroll="0.12"><img src="assets/layers/02-sol.webp" alt="" decoding="async"></div>
-            <div class="layer" data-depth="0.12" data-scroll="0.20" style="--img:url(assets/layers/03-valle.webp)"><img src="assets/layers/03-valle.webp" alt="" decoding="async"></div>
-            <div class="layer layer--mist" data-depth="0.18" data-scroll="0.28"><img src="assets/layers/04-niebla.webp" alt="" decoding="async"></div>
-            <div class="layer" data-depth="0.30" data-scroll="0.45" style="--img:url(assets/layers/05-pastos.webp)"><img src="assets/layers/05-pastos.webp" alt="" decoding="async"></div>
-            <div class="layer" data-depth="0.42" data-scroll="0.62" style="--img:url(assets/layers/06-follaje.webp)"><img src="assets/layers/06-follaje.webp" alt="" decoding="async"></div>
-            <div class="layer layer--fireflies" data-depth="0.5" data-scroll="0.5" id="fireflies"></div>
-            <div class="layer" data-depth="0.60" data-scroll="0.85" style="--img:url(assets/layers/07-marco.webp)"><img src="assets/layers/07-marco.webp" alt="" decoding="async"></div>
-            <div class="layer layer--butterfly" data-depth="0.75" data-scroll="0.95">
-                <div class="butterfly"><img src="assets/layers/08-mariposa.webp" alt="" decoding="async"></div>
-            </div>
-        </div>
+    <div class="tour" id="tour" aria-hidden="true">
+        <canvas class="tour__canvas" id="tour-canvas"></canvas>
+        <div class="tour__veil"></div>
+    </div>
+    <div class="tour-status glass" id="tour-status" role="status" aria-live="polite">
+        <span class="tour-status__text">Cargando el recorrido 3D</span>
+        <span class="tour-status__bar" aria-hidden="true"><i></i></span>
     </div>
 
     <!-- ===================== CABECERA =====================
@@ -82,7 +82,8 @@
       <!-- ===================== LANDING ===================== -->
       <div id="landing">
         <!-- ===================== HERO ===================== -->
-        <section class="hero" id="inicio" aria-labelledby="hero-title">
+        <!-- data-tour: punto del recorrido (0 = mirador · 1 = claro) que se alcanza al llegar a cada sección -->
+        <section class="hero" id="inicio" aria-labelledby="hero-title" data-tour="0">
             <div class="hero__float" data-depth="0.16">
                 <div class="hero__logo">
                     <h1 id="hero-title" class="logo">
@@ -90,7 +91,6 @@
                         <span class="logo__word">PyCon</span>
                         <span class="logo__sub">Colombia <b>2028</b></span>
                     </h1>
-                    <span class="hero__shadow" aria-hidden="true"></span>
                 </div>
 
                 <div class="hero__chips">
@@ -117,7 +117,7 @@
         </section>
 
         <!-- ===================== ACERCA ===================== -->
-        <section class="section" id="acerca" aria-labelledby="about-title">
+        <section class="section" id="acerca" aria-labelledby="about-title" data-tour="0.14">
             <div class="card card--frame reveal">
                 <div class="about">
                     <div class="about__text">
@@ -146,34 +146,43 @@
             </div>
         </section>
         <!-- ===================== BOLETAS ===================== -->
-        <section class="section" id="boletas" aria-labelledby="tickets-title">
+        <section class="section" id="boletas" aria-labelledby="tickets-title" data-tour="0.25">
             <header class="section-head card reveal">
                 <p class="eyebrow" data-i18n="tk.kicker">Únete a la manada</p>
                 <h2 class="title title--xl" id="tickets-title" data-i18n="tk.title">Boletas</h2>
                 <p data-i18n="tk.lead">Precios en pesos colombianos. Todas incluyen los 3 días, alimentación y kit de bienvenida.</p>
             </header>
             <ul class="tickets">
-
+                <li class="card ticket reveal">
+                    <h3 data-i18n="tk.student">Estudiante</h3>
+                    <p class="ticket__price">$180.000 <small>COP</small></p>
+                    <ul class="checks">
+                        <li data-i18n="tk.all">Acceso a los 3 días</li>
+                        <li data-i18n="tk.food">Alimentación incluida</li>
+                        <li data-i18n="tk.studentReq">Requiere carné vigente</li>
+                    </ul>
+                    <a class="btn btn--outline" href="#" data-i18n="tk.buy">Comprar</a>
+                </li>
                 <li class="card card--frame ticket ticket--featured reveal">
                     <span class="ticket__badge" data-i18n="tk.popular">Más popular</span>
                     <h3 data-i18n="tk.general">General</h3>
-                    <p class="ticket__price">$800,000 <small>COP</small></p>
+                    <p class="ticket__price">$350.000 <small>COP</small></p>
                     <ul class="checks">
                         <li data-i18n="tk.all">Acceso a los 3 días</li>
                         <li data-i18n="tk.food">Alimentación incluida</li>
                         <li data-i18n="tk.kit">Kit y camiseta oficial</li>
                     </ul>
-                    <a class="btn btn--primary" target="_blank" href="https://www.eventbrite.co/e/pycon-colombia-2026-tickets-1986172567616?aff=ebdssbdestsearch" data-i18n="tk.buy">Comprar</a>
+                    <a class="btn btn--primary" href="#" data-i18n="tk.buy">Comprar</a>
                 </li>
                 <li class="card ticket reveal">
                     <h3 data-i18n="tk.corp">Corporativa</h3>
-                    <p class="ticket__price">$1'000,000 <small>COP</small></p>
+                    <p class="ticket__price">$750.000 <small>COP</small></p>
                     <ul class="checks">
                         <li data-i18n="tk.all">Acceso a los 3 días</li>
                         <li data-i18n="tk.invoice">Factura electrónica</li>
                         <li data-i18n="tk.support">Apoyas a la comunidad</li>
                     </ul>
-                    <a class="btn btn--outline" target="_blank" href="https://www.eventbrite.co/e/pycon-colombia-2026-tickets-1986172567616?aff=ebdssbdestsearch" data-i18n="tk.buy">Comprar</a>
+                    <a class="btn btn--outline" href="#" data-i18n="tk.buy">Comprar</a>
                 </li>
                 <li class="card ticket reveal">
                     <h3 data-i18n="tk.grant">Becas</h3>
@@ -183,13 +192,13 @@
                         <li data-i18n="tk.grant2">Apoyo de viaje y hospedaje</li>
                         <li data-i18n="tk.grant3">Prioridad a grupos subrepresentados</li>
                     </ul>
-                    <a class="btn btn--outline" href="https://www.eventbrite.co/e/pycon-colombia-2026-tickets-1986172567616?aff=ebdssbdestsearch" data-i18n="tk.apply">Aplicar</a>
+                    <a class="btn btn--outline" href="#" data-i18n="tk.apply">Aplicar</a>
                 </li>
             </ul>
         </section>
 
         <!-- ===================== KEYNOTES ===================== -->
-        <section class="section" id="keynotes" aria-labelledby="keynotes-title">
+        <section class="section" id="keynotes" aria-labelledby="keynotes-title" data-tour="0.33">
             <header class="section-head card reveal">
                 <p class="eyebrow">Keynotes</p>
                 <h2 class="title title--xl" id="keynotes-title" data-i18n="kn.title">Keynotes, <span>las voces que abren y cierran cada día</span></h2>
@@ -198,7 +207,7 @@
         </section>
 
         <!-- ===================== PONENTES ===================== -->
-        <section class="section" id="ponentes" aria-labelledby="speakers-title">
+        <section class="section" id="ponentes" aria-labelledby="speakers-title" data-tour="0.385">
             <header class="section-head card reveal">
                 <p class="eyebrow" data-i18n="sp.kicker">Ponentes</p>
                 <h2 class="title title--xl" id="speakers-title" data-i18n="sp.title">Te presentamos a los ponentes, <span>las voces detrás de las charlas</span></h2>
@@ -207,7 +216,7 @@
         </section>
 
         <!-- ===================== ACCESO A LA AGENDA (página aparte) ===================== -->
-        <section class="section" id="agenda-teaser" aria-labelledby="teaser-title">
+        <section class="section" id="agenda-teaser" aria-labelledby="teaser-title" data-tour="0.47">
             <div class="card card--frame teaser reveal">
                 <div>
                     <p class="eyebrow" data-i18n="sch.kicker">Programa</p>
@@ -222,7 +231,7 @@
         </section>
 
         <!-- ===================== PATROCINADORES ===================== -->
-        <section class="section" id="patrocinadores" aria-labelledby="sponsors-title">
+        <section class="section" id="patrocinadores" aria-labelledby="sponsors-title" data-tour="0.53">
             <div class="card card--frame sponsors reveal">
                 <h2 class="title title--xl" id="sponsors-title" data-i18n="spo.title">Con el respaldo de líderes de la industria</h2>
                 <p class="sponsors__lead" data-i18n="spo.lead">PyCon Colombia es posible gracias al apoyo de organizaciones comprometidas con el ecosistema Python y la innovación tecnológica en Latinoamérica.</p>
@@ -232,7 +241,7 @@
         </section>
 
         <!-- ===================== LUGAR ===================== -->
-        <section class="section" id="lugar" aria-labelledby="venue-title">
+        <section class="section" id="lugar" aria-labelledby="venue-title" data-tour="0.63">
             <div class="card card--frame venue reveal">
                 <div class="venue__info">
                     <p class="eyebrow" data-i18n="vn.kicker">El lugar</p>
@@ -253,7 +262,7 @@
         </section>
 
         <!-- ===================== CFP + VOLUNTARIADO ===================== -->
-        <section class="section" id="comunidad">
+        <section class="section" id="comunidad" data-tour="0.72">
             <div class="duo">
                 <article class="card card--frame reveal" id="cfp">
                     <p class="eyebrow" data-i18n="cfp.kicker">Convocatoria abierta</p>
@@ -276,7 +285,7 @@
         </section>
 
         <!-- ===================== FAQ ===================== -->
-        <section class="section" id="faq" aria-labelledby="faq-title">
+        <section class="section" id="faq" aria-labelledby="faq-title" data-tour="0.79">
             <div class="card card--frame reveal">
                 <p class="eyebrow" data-i18n="faq.kicker">¿Dudas?</p>
                 <h2 class="title" id="faq-title" data-i18n="faq.title">Preguntas frecuentes</h2>
@@ -291,7 +300,7 @@
         </section>
 
         <!-- ===================== NEWSLETTER ===================== -->
-        <section class="section section--narrow" id="newsletter">
+        <section class="section section--narrow" id="newsletter" data-tour="0.89">
             <form class="card card--frame newsletter reveal" novalidate>
                 <h2 class="title" data-i18n="nl.title">No te pierdas nada</h2>
                 <p data-i18n="nl.p">Recibe noticias de ponentes, agenda y boletas.</p>
@@ -412,9 +421,18 @@
         <symbol id="ico-ext" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></symbol>
     </svg>
 
+    <script>
+        // Abierta como archivo (file://) el navegador no deja cargar el modelo 3D: se avisa y queda el fondo simple
+        if (location.protocol === 'file:') {
+            const s = document.getElementById('tour-status');
+            s.querySelector('.tour-status__text').textContent = 'Abre la página con un servidor local (p. ej. Live Server) para ver el recorrido 3D';
+            s.classList.add('is-error');
+            setTimeout(() => s.classList.add('is-done'), 9000);
+        }
+    </script>
     <script src="data.js"></script>
-    <script src="parallax.js"></script>
     <script src="main.js"></script>
     <script src="views.js"></script>
+    <script type="module" src="tour3d.js"></script>
 </body>
 </html>
