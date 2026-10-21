@@ -1,4 +1,4 @@
-# PyCon Colombia 2028 — Landing interactiva
+# PyCon Colombia 2028 — Landing page-web page
 
 Maqueta de la landing de PyCon Colombia 2028 (edición Amazonía).
 
