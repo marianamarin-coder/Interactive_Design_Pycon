@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>PyCon Colombia 2028</title>
+    <meta name="description" content="PyCon Colombia 2028 — la conferencia de Python más grande de Colombia. Edición Amazonía: charlas, keynotes, talleres y comunidad en Medellín.">
+    <meta name="theme-color" content="#DDF3EE">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <!-- Poppins: tipografía del Figma "botones y tarjetas pycon" -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Recorrido 3D: el modelo (9 MB, Draco) empieza a descargarse de inmediato -->
+    <link rel="preload" href="assets/3d/recorrido-amazonas.glb" as="fetch" type="model/gltf-binary" crossorigin>
+    <link rel="stylesheet" href="styles.css">
+
+    <script type="importmap">
+    {
+        "imports": {
+            "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+            "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+        }
+    }
+    </script>
+</head>
+
+<body>
+    <a class="skip-link" href="#contenido" data-i18n="skip">Saltar al contenido</a>
+
+    <!-- ===================== RECORRIDO 3D (Three.js · tour3d.js) =====================
+         Escena de Blender (assets/3d/recorrido-amazonas.glb). El scroll mueve la cámara
+         animada del mirador al claro de la ceiba; cada sección marca su hito con data-tour.
+         El velo aclara el cielo detrás del logo y oscurece levemente los bordes.
+    -->
+    <div class="tour" id="tour" aria-hidden="true">
+        <canvas class="tour__canvas" id="tour-canvas"></canvas>
+        <div class="tour__veil"></div>
+    </div>
+    <div class="tour-status glass" id="tour-status" role="status" aria-live="polite">
+        <span class="tour-status__text">Cargando el recorrido 3D</span>
+        <span class="tour-status__bar" aria-hidden="true"><i></i></span>
+    </div>
+
+    <!-- ===================== CABECERA =====================
+         Al inicio solo se ve el cambio de idioma. Al hacer scroll aparece la barra en liquid glass.
+         En las páginas internas la barra siempre está visible.
+    -->
+    <header class="site-header" id="top">
+        <div class="site-header__bar glass glass--refract">
+            <a href="#inicio" class="brand" aria-label="PyCon Colombia 2028, inicio">
+                <svg class="brand__logo" viewBox="0 0 64 64" aria-hidden="true"><use href="#py-mark"/></svg>
+                <span class="brand__text">PyCon <b>CO</b></span>
+            </a>
+
+            <nav class="main-nav" id="main-nav" aria-label="Menú principal">
+                <a href="#keynotes">Keynotes</a>
+                <a href="#ponentes" data-i18n="nav.speakers">Ponentes</a>
+                <a href="#/agenda" data-route="agenda" data-i18n="nav.schedule">Agenda</a>
+                <a href="#patrocinadores" data-i18n="nav.sponsors">Patrocinadores</a>
+                <a href="#lugar" data-i18n="nav.venue">Lugar</a>
+                <a href="#/codigo-de-conducta" data-route="codigo-de-conducta" data-i18n="nav.coc">Código de conducta</a>
+                <a class="btn btn--primary btn--sm main-nav__cta" href="#boletas" data-i18n="cta.buy">Comprar boleta</a>
+            </nav>
+
+            <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="main-nav">
+                <span class="nav-toggle__bar"></span><span class="nav-toggle__bar"></span><span class="nav-toggle__bar"></span>
+                <span class="sr-only" data-i18n="menu">Menú</span>
+            </button>
+        </div>
+
+        <!-- Único control visible desde el inicio -->
+        <button class="lang-toggle glass" type="button" aria-label="Cambiar idioma / Change language">
+            <span class="lang-toggle__thumb" aria-hidden="true"></span>
+            <span data-lang="es" class="is-active">ES</span>
+            <span data-lang="en">EN</span>
+        </button>
+    </header>
+
+    <main id="contenido">
+      <!-- ===================== LANDING ===================== -->
+      <div id="landing">
+        <!-- ===================== HERO ===================== -->
+        <!-- data-tour: punto del recorrido (0 = mirador · 1 = claro) que se alcanza al llegar a cada sección -->
+        <section class="hero" id="inicio" aria-labelledby="hero-title" data-tour="0">
+            <div class="hero__float" data-depth="0.16">
+                <div class="hero__logo">
+                    <h1 id="hero-title" class="logo">
+                        <svg class="logo__mark" viewBox="0 0 64 64" aria-hidden="true"><use href="#py-mark"/></svg>
+                        <span class="logo__word">PyCon</span>
+                        <span class="logo__sub">Colombia <b>2028</b></span>
+                    </h1>
+                </div>
+
+                <div class="hero__chips">
+                    <p class="chip glass">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 22s7-6.2 7-12a7 7 0 1 0-14 0c0 5.8 7 12 7 12Z"/><circle cx="12" cy="10" r="2.5"/></svg>
+                        <span><small data-i18n="hero.city">Ciudad</small>Medellín, Colombia</span>
+                    </p>
+                    <p class="chip glass">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 2v3M17 2v3M3 9h18M5 5h14a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2Z"/></svg>
+                        <span><small data-i18n="hero.dateLabel">Fecha</small><span data-i18n="hero.date">14 – 16 de julio, 2028</span></span>
+                    </p>
+                </div>
+
+                <div class="hero__ctas">
+                    <a class="btn btn--primary" href="#boletas" data-i18n="cta.tickets">Obtén tu boleta</a>
+                    <a class="btn btn--glass glass" href="#ponentes" data-i18n="cta.speakers">Conoce a los ponentes</a>
+                </div>
+            </div>
+
+            <a class="scroll-hint glass" href="#acerca">
+                <span data-i18n="scroll">Explora la selva</span>
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+            </a>
+        </section>
+
+        <!-- ===================== ACERCA ===================== -->
+        <section class="section" id="acerca" aria-labelledby="about-title" data-tour="0.14">
+            <div class="card card--frame reveal">
+                <div class="about">
+                    <div class="about__text">
+                        <p class="eyebrow" data-i18n="about.kicker">Sobre la conferencia</p>
+                        <h2 class="title" id="about-title" data-i18n="about.title">Una comunidad que crece como la selva</h2>
+                        <p data-i18n="about.p1">PyCon Colombia es una conferencia sin ánimo de lucro, organizada por voluntarios de la comunidad Python. Cada año reunimos a personas desarrolladoras, científicas de datos, estudiantes y docentes para aprender, compartir y conectar.</p>
+                        <p data-i18n="about.p2">En 2028 celebramos nuestra undécima edición inspirada en la Amazonía: un ecosistema diverso, interconectado y lleno de vida, igual que nuestra comunidad.</p>
+                    </div>
+                    <div class="inset about__count">
+                        <p class="inset__label" data-i18n="cd.title">Faltan</p>
+                        <div class="countdown" role="timer" aria-live="off">
+                            <div><b id="cd-days">000</b><small data-i18n="cd.days">días</small></div>
+                            <div><b id="cd-hours">00</b><small data-i18n="cd.hours">horas</small></div>
+                            <div><b id="cd-mins">00</b><small data-i18n="cd.mins">min</small></div>
+                            <div><b id="cd-secs">00</b><small data-i18n="cd.secs">seg</small></div>
+                        </div>
+                    </div>
+                </div>
+
+                <ul class="stats">
+                    <li class="stat"><b data-count="600">0</b><span data-i18n="stats.people">+ asistentes</span></li>
+                    <li class="stat"><b data-count="30">0</b><span data-i18n="stats.talks">charlas</span></li>
+                    <li class="stat"><b data-count="15">0</b><span data-i18n="stats.workshops">+ talleres</span></li>
+                    <li class="stat"><b data-count="5">0</b><span data-i18n="stats.keynotes">keynotes</span></li>
+                </ul>
+            </div>
+        </section>
+        <!-- ===================== BOLETAS ===================== -->
+        <section class="section" id="boletas" aria-labelledby="tickets-title" data-tour="0.25">
+            <header class="section-head card reveal">
+                <p class="eyebrow" data-i18n="tk.kicker">Únete a la manada</p>
+                <h2 class="title title--xl" id="tickets-title" data-i18n="tk.title">Boletas</h2>
+                <p data-i18n="tk.lead">Precios en pesos colombianos. Todas incluyen los 3 días, alimentación y kit de bienvenida.</p>
+            </header>
+            <ul class="tickets">
+                <li class="card ticket reveal">
+                    <h3 data-i18n="tk.student">Estudiante</h3>
+                    <p class="ticket__price">$180.000 <small>COP</small></p>
+                    <ul class="checks">
+                        <li data-i18n="tk.all">Acceso a los 3 días</li>
+                        <li data-i18n="tk.food">Alimentación incluida</li>
+                        <li data-i18n="tk.studentReq">Requiere carné vigente</li>
+                    </ul>
+                    <a class="btn btn--outline" href="#" data-i18n="tk.buy">Comprar</a>
+                </li>
+                <li class="card card--frame ticket ticket--featured reveal">
+                    <span class="ticket__badge" data-i18n="tk.popular">Más popular</span>
+                    <h3 data-i18n="tk.general">General</h3>
+                    <p class="ticket__price">$350.000 <small>COP</small></p>
+                    <ul class="checks">
+                        <li data-i18n="tk.all">Acceso a los 3 días</li>
+                        <li data-i18n="tk.food">Alimentación incluida</li>
+                        <li data-i18n="tk.kit">Kit y camiseta oficial</li>
+                    </ul>
+                    <a class="btn btn--primary" href="#" data-i18n="tk.buy">Comprar</a>
+                </li>
+                <li class="card ticket reveal">
+                    <h3 data-i18n="tk.corp">Corporativa</h3>
+                    <p class="ticket__price">$750.000 <small>COP</small></p>
+                    <ul class="checks">
+                        <li data-i18n="tk.all">Acceso a los 3 días</li>
+                        <li data-i18n="tk.invoice">Factura electrónica</li>
+                        <li data-i18n="tk.support">Apoyas a la comunidad</li>
+                    </ul>
+                    <a class="btn btn--outline" href="#" data-i18n="tk.buy">Comprar</a>
+                </li>
+                <li class="card ticket reveal">
+                    <h3 data-i18n="tk.grant">Becas</h3>
+                    <p class="ticket__price" data-i18n="tk.free">Gratis</p>
+                    <ul class="checks">
+                        <li data-i18n="tk.grant1">Para quienes no pueden pagar</li>
+                        <li data-i18n="tk.grant2">Apoyo de viaje y hospedaje</li>
+                        <li data-i18n="tk.grant3">Prioridad a grupos subrepresentados</li>
+                    </ul>
+                    <a class="btn btn--outline" href="#" data-i18n="tk.apply">Aplicar</a>
+                </li>
+            </ul>
+        </section>
+
+        <!-- ===================== KEYNOTES ===================== -->
+        <section class="section" id="keynotes" aria-labelledby="keynotes-title" data-tour="0.33">
+            <header class="section-head card reveal">
+                <p class="eyebrow">Keynotes</p>
+                <h2 class="title title--xl" id="keynotes-title" data-i18n="kn.title">Keynotes, <span>las voces que abren y cierran cada día</span></h2>
+            </header>
+            <ul class="speakers" id="keynotes-list"></ul>
+        </section>
+
+        <!-- ===================== PONENTES ===================== -->
+        <section class="section" id="ponentes" aria-labelledby="speakers-title" data-tour="0.385">
+            <header class="section-head card reveal">
+                <p class="eyebrow" data-i18n="sp.kicker">Ponentes</p>
+                <h2 class="title title--xl" id="speakers-title" data-i18n="sp.title">Te presentamos a los ponentes, <span>las voces detrás de las charlas</span></h2>
+            </header>
+            <ul class="speakers" id="speakers-list"></ul>
+        </section>
+
+        <!-- ===================== ACCESO A LA AGENDA (página aparte) ===================== -->
+        <section class="section" id="agenda-teaser" aria-labelledby="teaser-title" data-tour="0.47">
+            <div class="card card--frame teaser reveal">
+                <div>
+                    <p class="eyebrow" data-i18n="sch.kicker">Programa</p>
+                    <h2 class="title" id="teaser-title" data-i18n="teaser.title">Arma tu agenda de 3 días</h2>
+                    <p data-i18n="teaser.p">Explora las charlas, talleres y keynotes, filtra por track, nivel o idioma, guarda tus favoritas y encuentra cómo llegar a cada sala del campus.</p>
+                </div>
+                <div class="btn-row">
+                    <a class="btn btn--primary" href="#/agenda" data-i18n="teaser.btn">Ver la agenda</a>
+                    <a class="btn btn--outline" href="#/agenda/mi" data-i18n="sch.mine">Mi agenda</a>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===================== PATROCINADORES ===================== -->
+        <section class="section" id="patrocinadores" aria-labelledby="sponsors-title" data-tour="0.53">
+            <div class="card card--frame sponsors reveal">
+                <h2 class="title title--xl" id="sponsors-title" data-i18n="spo.title">Con el respaldo de líderes de la industria</h2>
+                <p class="sponsors__lead" data-i18n="spo.lead">PyCon Colombia es posible gracias al apoyo de organizaciones comprometidas con el ecosistema Python y la innovación tecnológica en Latinoamérica.</p>
+                <a class="btn btn--primary" href="mailto:sponsors@pycon.co" data-i18n="spo.btn">Sé patrocinador</a>
+                <div id="sponsor-tiers"></div>
+            </div>
+        </section>
+
+        <!-- ===================== LUGAR ===================== -->
+        <section class="section" id="lugar" aria-labelledby="venue-title" data-tour="0.63">
+            <div class="card card--frame venue reveal">
+                <div class="venue__info">
+                    <p class="eyebrow" data-i18n="vn.kicker">El lugar</p>
+                    <h2 class="title" id="venue-title">Universidad EAFIT</h2>
+                    <p data-i18n="vn.p">Carrera 49 #7 Sur-50, Medellín. Un campus verde con más de 500 especies de plantas: el hogar perfecto para nuestra edición Amazonía.</p>
+                    <ul class="checks">
+                        <li data-i18n="vn.metro">Metro: estación Aguacatala (línea A), 10 min caminando</li>
+                        <li data-i18n="vn.air">Aeropuerto José María Córdova (MDE) a 50 min</li>
+                        <li data-i18n="vn.hotel">Tarifas especiales en hoteles aliados</li>
+                    </ul>
+                    <a class="btn btn--primary" href="https://www.openstreetmap.org/?mlat=6.2003&mlon=-75.5781#map=16/6.2003/-75.5781" target="_blank" rel="noopener" data-i18n="vn.map">Cómo llegar</a>
+                </div>
+                <div class="inset venue__map">
+                    <iframe title="Mapa de la Universidad EAFIT" loading="lazy"
+                        src="https://www.openstreetmap.org/export/embed.html?bbox=-75.5841%2C6.1963%2C-75.5721%2C6.2043&amp;layer=mapnik&amp;marker=6.2003%2C-75.5781"></iframe>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===================== CFP + VOLUNTARIADO ===================== -->
+        <section class="section" id="comunidad" data-tour="0.72">
+            <div class="duo">
+                <article class="card card--frame reveal" id="cfp">
+                    <p class="eyebrow" data-i18n="cfp.kicker">Convocatoria abierta</p>
+                    <h2 class="title" data-i18n="cfp.title">Comparte lo que sabes</h2>
+                    <p data-i18n="cfp.p">Buscamos charlas, talleres y lightning talks sobre web, datos, IA, educación, ciencia y comunidad. Si es tu primera charla, te acompañamos con mentorías.</p>
+                    <div class="btn-row">
+                        <a class="btn btn--primary" href="#" data-i18n="cfp.btn">Enviar propuesta</a>
+                        <a class="btn btn--outline" href="#" data-i18n="cfp.mentor">Quiero mentoría</a>
+                    </div>
+                </article>
+                <article class="card card--frame reveal" id="voluntariado">
+                    <p class="eyebrow" data-i18n="vol.kicker">Voluntariado</p>
+                    <h2 class="title" data-i18n="vol.title">Vive PyCon desde adentro</h2>
+                    <p data-i18n="vol.p">PyCon Colombia existe gracias a decenas de voluntarios. Ayúdanos con logística, registro, redes, diseño o acompañando a ponentes. Recibes camiseta oficial, alimentación y la mejor experiencia de comunidad.</p>
+                    <div class="btn-row">
+                        <a class="btn btn--primary" href="#/voluntariado" data-i18n="vol.btn">Registrarme como voluntario</a>
+                    </div>
+                </article>
+            </div>
+        </section>
+
+        <!-- ===================== FAQ ===================== -->
+        <section class="section" id="faq" aria-labelledby="faq-title" data-tour="0.79">
+            <div class="card card--frame reveal">
+                <p class="eyebrow" data-i18n="faq.kicker">¿Dudas?</p>
+                <h2 class="title" id="faq-title" data-i18n="faq.title">Preguntas frecuentes</h2>
+                <div class="faq">
+                    <details><summary data-i18n="faq.q1">¿Necesito saber Python para asistir?</summary><p data-i18n="faq.a1">¡Para nada! Hay talleres para principiantes y charlas para todos los niveles. Solo necesitas curiosidad.</p></details>
+                    <details><summary data-i18n="faq.q2">¿En qué idioma son las charlas?</summary><p data-i18n="faq.a2">La mayoría en español. Algunas keynotes y charlas serán en inglés, y lo indicamos en la agenda.</p></details>
+                    <details><summary data-i18n="faq.q3">¿Puedo transferir o reembolsar mi boleta?</summary><p data-i18n="faq.a3">Puedes transferirla hasta 7 días antes del evento. Los reembolsos aplican hasta 30 días antes.</p></details>
+                    <details><summary data-i18n="faq.q4">¿Las charlas quedan grabadas?</summary><p data-i18n="faq.a4">Sí. Las charlas de la sala principal se publican en nuestro canal de YouTube unas semanas después.</p></details>
+                    <details><summary data-i18n="faq.q5">¿El lugar es accesible?</summary><p data-i18n="faq.a5">Sí, el campus cuenta con rampas y ascensores. Si necesitas algún apoyo, escríbenos y lo coordinamos.</p></details>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===================== NEWSLETTER ===================== -->
+        <section class="section section--narrow" id="newsletter" data-tour="0.89">
+            <form class="card card--frame newsletter reveal" novalidate>
+                <h2 class="title" data-i18n="nl.title">No te pierdas nada</h2>
+                <p data-i18n="nl.p">Recibe noticias de ponentes, agenda y boletas.</p>
+                <div class="newsletter__row">
+                    <label class="sr-only" for="nl-email">Email</label>
+                    <input id="nl-email" type="email" placeholder="tu@email.com" required autocomplete="email">
+                    <button class="btn btn--primary" type="submit" data-i18n="nl.btn">Suscribirme</button>
+                </div>
+                <p class="newsletter__msg" role="status" aria-live="polite"></p>
+            </form>
+        </section>
+      </div>
+
+      <!-- ===================== PÁGINAS INTERNAS (agenda, charla, patrocinador, código…) ===================== -->
+      <div id="view" class="view" hidden tabindex="-1"></div>
+    </main>
+
+    <!-- ===================== PIE DE PÁGINA (versión anterior) ===================== -->
+    <footer class="site-footer">
+        <div class="site-footer__grid">
+            <div>
+                <p class="site-footer__brand">PyCon Colombia 2028</p>
+                <p data-i18n="ft.about">Conferencia sin ánimo de lucro organizada por la comunidad Python de Colombia.</p>
+                <a href="mailto:info@pycon.co">info@pycon.co</a>
+            </div>
+            <nav aria-label="Ediciones anteriores">
+                <p class="site-footer__h" data-i18n="ft.past">Ediciones anteriores</p>
+                <ul>
+                    <li><a href="https://2026.pycon.co/">2026</a></li>
+                    <li><a href="https://2025.pycon.co/">2025</a></li>
+                    <li><a href="#">2024</a></li>
+                    <li><a href="#">2023</a></li>
+                </ul>
+            </nav>
+            <nav aria-label="Enlaces">
+                <p class="site-footer__h" data-i18n="ft.links">Enlaces</p>
+                <ul>
+                    <li><a href="#/codigo-de-conducta" data-i18n="nav.coc">Código de conducta</a></li>
+                    <li><a href="#/agenda" data-i18n="nav.schedule">Agenda</a></li>
+                    <li><a href="#patrocinadores" data-i18n="nav.sponsors">Patrocinadores</a></li>
+                    <li><a href="#faq">FAQ</a></li>
+                </ul>
+            </nav>
+            <div>
+                <p class="site-footer__h" data-i18n="ft.follow">Síguenos</p>
+                <ul class="social social--footer">
+                    <li><a href="https://x.com/pyconcolombia" aria-label="X / Twitter"><svg viewBox="0 0 24 24"><use href="#ico-x"/></svg></a></li>
+                    <li><a href="https://www.facebook.com/pyconcolombia/" aria-label="Facebook"><svg viewBox="0 0 24 24"><use href="#ico-fb"/></svg></a></li>
+                    <li><a href="https://www.linkedin.com/company/pycon-colombia" aria-label="LinkedIn"><svg viewBox="0 0 24 24"><use href="#ico-in"/></svg></a></li>
+                    <li><a href="https://www.youtube.com/pyconcolombia" aria-label="YouTube"><svg viewBox="0 0 24 24"><use href="#ico-yt"/></svg></a></li>
+                    <li><a href="#" aria-label="Instagram"><svg viewBox="0 0 24 24"><use href="#ico-ig"/></svg></a></li>
+                </ul>
+            </div>
+        </div>
+        <p class="site-footer__legal">© 2028 PyCon Colombia · <span data-i18n="ft.made">Hecho con 🐍 y 🌿 por voluntarios</span></p>
+    </footer>
+
+    <a class="to-top glass" href="#top" aria-label="Volver arriba" data-i18n-label="toTop">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 15l6-6 6 6"/></svg>
+    </a>
+
+    <!-- ===================== MODAL DE PONENTE (perfil completo) ===================== -->
+    <dialog class="speaker-modal" id="speaker-modal" aria-labelledby="sm-name">
+        <div class="card card--frame speaker-modal__card">
+            <button class="speaker-modal__close" type="button" data-close aria-label="Cerrar">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+            </button>
+            <div class="speaker-modal__grid">
+                <div class="inset speaker-modal__photo"><div class="avatar avatar--xl" id="sm-avatar"><span></span></div></div>
+                <div>
+                    <h2 class="title" id="sm-name"></h2>
+                    <p class="muted" id="sm-role"></p>
+                    <ul class="social" id="sm-social"></ul>
+                    <h3 class="speaker-modal__h" data-i18n="sm.about">Acerca de</h3>
+                    <p id="sm-bio"></p>
+                    <h3 class="speaker-modal__h" data-i18n="sm.session">Sesión</h3>
+                    <div class="inset speaker-modal__session">
+                        <p class="speaker-modal__talk" id="sm-talk"></p>
+                        <ul class="tags" id="sm-tags"></ul>
+                        <a class="btn btn--primary" id="sm-talk-link" href="#" data-i18n="sm.viewTalk">Ver la charla</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </dialog>
+
+    <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+        <defs>
+            <!-- Refracción del liquid glass (solo navegadores Chromium la aplican al fondo) -->
+            <filter id="liquid-glass" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB">
+                <feTurbulence type="fractalNoise" baseFrequency="0.008 0.02" numOctaves="2" seed="7" result="noise"/>
+                <feGaussianBlur in="noise" stdDeviation="2" result="soft"/>
+                <feDisplacementMap in="SourceGraphic" in2="soft" scale="38" xChannelSelector="R" yChannelSelector="G"/>
+            </filter>
+        </defs>
+        <symbol id="py-mark" viewBox="0 0 64 64">
+            <path d="M31.5 3C22 3 17 6.4 17 12.5V20h15v3H10.5C4.6 23 1 27.6 1 36.5S4.6 50 10.5 50H16v-8.3C16 35.8 20.6 31 26.5 31h13c4.9 0 8.5-3.8 8.5-8.6V12.5C48 6.6 42 3 31.5 3Z" fill="#47868B"/>
+            <path d="M31.5 3C22 3 17 6.4 17 12.5V20h15v3H10.5C4.6 23 1 27.6 1 36.5S4.6 50 10.5 50H16v-8.3C16 35.8 20.6 31 26.5 31h13c4.9 0 8.5-3.8 8.5-8.6V12.5C48 6.6 42 3 31.5 3Z" fill="#F59216" transform="rotate(180 32 32)"/>
+            <circle cx="24" cy="11.5" r="2.8" fill="#FFFDF7"/>
+            <circle cx="40" cy="52.5" r="2.8" fill="#FFFDF7"/>
+        </symbol>
+        <symbol id="ico-gh" viewBox="0 0 24 24"><path fill="currentColor" d="M12 .5a11.5 11.5 0 0 0-3.6 22.4c.6.1.8-.3.8-.6v-2c-3.2.7-3.9-1.5-3.9-1.5-.5-1.3-1.3-1.7-1.3-1.7-1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1 1.8 2.8 1.3 3.5 1 .1-.8.4-1.3.7-1.6-2.6-.3-5.3-1.3-5.3-5.7 0-1.3.5-2.3 1.2-3.1-.1-.3-.5-1.5.1-3.1 0 0 1-.3 3.2 1.2a11 11 0 0 1 5.8 0c2.2-1.5 3.2-1.2 3.2-1.2.6 1.6.2 2.8.1 3.1.8.8 1.2 1.9 1.2 3.1 0 4.4-2.7 5.4-5.3 5.7.4.4.8 1.1.8 2.2v3.2c0 .3.2.7.8.6A11.5 11.5 0 0 0 12 .5Z"/></symbol>
+        <symbol id="ico-in" viewBox="0 0 24 24"><path fill="currentColor" d="M4.98 3.5a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5ZM3 9.5h4V21H3V9.5Zm7 0h3.8v1.6h.1c.5-1 1.8-2 3.8-2 4 0 4.8 2.6 4.8 6V21h-4v-5.2c0-1.2 0-2.9-1.8-2.9s-2 1.4-2 2.8V21h-4V9.5Z"/></symbol>
+        <symbol id="ico-x" viewBox="0 0 24 24"><path fill="currentColor" d="M17.8 2.5h3.3l-7.2 8.2 8.5 10.8h-6.6l-5.2-6.6-5.9 6.6H1.4l7.7-8.8L1 2.5h6.8l4.7 6 5.3-6Zm-1.2 17.1h1.8L7.5 4.3H5.5l11.1 15.3Z"/></symbol>
+        <symbol id="ico-yt" viewBox="0 0 24 24"><path fill="currentColor" d="M23 7.2a3 3 0 0 0-2.1-2.1C19 4.6 12 4.6 12 4.6s-7 0-8.9.5A3 3 0 0 0 1 7.2 31 31 0 0 0 .5 12a31 31 0 0 0 .5 4.8 3 3 0 0 0 2.1 2.1c1.9.5 8.9.5 8.9.5s7 0 8.9-.5a3 3 0 0 0 2.1-2.1 31 31 0 0 0 .5-4.8 31 31 0 0 0-.5-4.8ZM9.7 15.1V8.9L15.5 12l-5.8 3.1Z"/></symbol>
+        <symbol id="ico-web" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9.5"/><path d="M2.5 12h19M12 2.5c3 3.2 3 15.8 0 19M12 2.5c-3 3.2-3 15.8 0 19"/></g></symbol>
+        <symbol id="ico-star" viewBox="0 0 24 24"><path d="M12 3l2.6 5.6 6 .7-4.5 4.1 1.2 6L12 16.4 6.7 19.4l1.2-6L3.4 9.3l6-.7Z"/></symbol>
+        <symbol id="ico-ig" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></g></symbol>
+        <symbol id="ico-fb" viewBox="0 0 24 24"><path fill="currentColor" d="M13.5 21v-7.5h2.6l.4-3h-3V8.6c0-.9.3-1.5 1.5-1.5h1.6V4.4c-.3 0-1.2-.1-2.3-.1-2.3 0-3.9 1.4-3.9 4v2.2H7.8v3h2.6V21h3.1Z"/></symbol>
+        <symbol id="ico-pin" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s7-6.2 7-12a7 7 0 1 0-14 0c0 5.8 7 12 7 12Z"/><circle cx="12" cy="10" r="2.5"/></g></symbol>
+        <symbol id="ico-back" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" d="M15 5l-7 7 7 7"/></symbol>
+        <symbol id="ico-next" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></symbol>
+        <symbol id="ico-filter" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M4 6h16M7 12h10M10 18h4"/></symbol>
+        <symbol id="ico-clock" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></g></symbol>
+        <symbol id="ico-walk" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="13" cy="4" r="2"/><path d="M10 21l2-6 3 3v3M9 12l2-4 4 3 3 1M11 8l-3 2-1 4"/></g></symbol>
+        <symbol id="ico-play" viewBox="0 0 24 24"><path fill="currentColor" d="M8 5v14l11-7Z"/></symbol>
+        <symbol id="ico-cal" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M7 2v3M17 2v3M3 9h18M5 5h14a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2Z"/></symbol>
+        <symbol id="ico-ext" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></symbol>
+    </svg>
+
+    <script>
+        // Abierta como archivo (file://) el navegador no deja cargar el modelo 3D: se avisa y queda el fondo simple
+        if (location.protocol === 'file:') {
+            const s = document.getElementById('tour-status');
+            s.querySelector('.tour-status__text').textContent = 'Abre la página con un servidor local (p. ej. Live Server) para ver el recorrido 3D';
+            s.classList.add('is-error');
+            setTimeout(() => s.classList.add('is-done'), 9000);
+        }
+    </script>
+    <script src="data.js"></script>
+    <script src="main.js"></script>
+    <script src="views.js"></script>
+    <script type="module" src="tour3d.js"></script>
+</body>
+</html>
