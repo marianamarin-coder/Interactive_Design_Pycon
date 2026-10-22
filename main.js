@@ -204,12 +204,16 @@
     const carouselBtns = $$('[data-carousel]');
     function updateCarousel() {
         const max = row.scrollWidth - row.clientWidth - 2;
-        carouselBtns.forEach((b) => { b.disabled = +b.dataset.carousel < 0 ? row.scrollLeft <= 2 : row.scrollLeft >= max; });
+        const atStart = row.scrollLeft <= 2, atEnd = row.scrollLeft >= max;
+        carouselBtns.forEach((b) => { b.disabled = +b.dataset.carousel < 0 ? atStart : atEnd; });
     }
+    // cada flecha avanza una página completa (las tarjetas que caben a la vez)
     carouselBtns.forEach((b) => b.addEventListener('click', () => {
+        const gap = parseFloat(getComputedStyle(row).columnGap) || 0;
         const card = row.querySelector('.speaker');
-        const step = card ? card.getBoundingClientRect().width + parseFloat(getComputedStyle(row).columnGap || 0) : row.clientWidth * 0.8;
-        row.scrollBy({ left: +b.dataset.carousel * step * Math.max(1, Math.floor(row.clientWidth / step)), behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+        const step = card ? card.getBoundingClientRect().width + gap : row.clientWidth;
+        const perPage = Math.max(1, Math.round((row.clientWidth + gap) / step));
+        row.scrollBy({ left: +b.dataset.carousel * step * perPage, behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
     }));
     row.addEventListener('scroll', updateCarousel, { passive: true });
     addEventListener('resize', updateCarousel);
