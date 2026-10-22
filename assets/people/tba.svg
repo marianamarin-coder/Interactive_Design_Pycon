@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 480">
+  <!-- Silueta para la keynote por anunciar -->
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#E5FFFE"/>
+      <stop offset="1" stop-color="#9FCFCB"/>
+    </linearGradient>
+  </defs>
+  <rect width="480" height="480" fill="url(#bg)"/>
+  <circle cx="240" cy="190" r="86" fill="#47868B"/>
+  <path d="M70 480c10-110 84-178 170-178s160 68 170 178Z" fill="#47868B"/>
+  <text x="240" y="222" text-anchor="middle" font-family="Poppins, Arial, sans-serif" font-size="96" font-weight="700" fill="#FFFDF7">?</text>
+</svg>
