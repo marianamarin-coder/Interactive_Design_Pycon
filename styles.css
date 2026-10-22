@@ -79,8 +79,7 @@ button { font: inherit; color: inherit; }
 .tour__canvas {
     position: absolute; inset: 0; width: 100%; height: 100%; display: block;
     opacity: 0; transition: opacity 1.4s ease;
-    /* gradación de los renders de Blender: un poco más de saturación y contraste */
-    filter: saturate(1.25) contrast(1.06);
+    /* la gradación (saturación/contraste) se hace en el shader: un filter: aquí costaría una pasada extra por cuadro */
 }
 .tour.is-ready .tour__canvas { opacity: 1; }
 
@@ -154,8 +153,14 @@ button { font: inherit; color: inherit; }
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
     .glass { background-color: rgba(255, 253, 247, .9); }
 }
-.has-refraction .glass--refract {
+/* La refracción SVG se recalcula en cada cuadro del 3D que pasa por detrás: solo en calidad alta */
+.has-refraction.tour-hq .glass--refract {
     backdrop-filter: url(#liquid-glass) blur(8px) saturate(160%) brightness(1.08);
+}
+/* Calidad baja: vidrio sin desenfoque (el desenfoque sobre un canvas animado es caro) y más opaco */
+.tour-lite .glass {
+    -webkit-backdrop-filter: none; backdrop-filter: none;
+    --glass-fill: rgba(255, 253, 247, .92);
 }
 
 /* =========================================================================

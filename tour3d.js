@@ -11,9 +11,12 @@
    - Cada zona del GLB (nodos G_*) trae extras.p_ini / p_fin: solo se dibujan
      las zonas activas para el progreso actual.
    - Los assets repetidos se agrupan en InstancedMesh por celdas del terreno
-     para reducir las llamadas de dibujo.
+     para reducir las llamadas de dibujo, y cada celda se descarta por
+     distancia según el tamaño del objeto (además del frustum culling).
    - Luz de atardecer del inventario: sol cálido con sombras, relleno frío,
      cielo degradado y bruma por distancia teñida hacia el sol.
+   - Calidad por niveles (alta / media / baja) elegida midiendo la GPU al
+     cargar; si después va lento baja de nivel sola.
    - El logo del hero (.hero__float) se desplaza con el puntero, como antes.
    ========================================================================= */
 import * as THREE from 'three';
@@ -33,10 +36,15 @@ const LIGHT = {
 const VIEW_RANGE = [0.40, 0.50];   // páginas internas: tramo tranquilo del río (playa con capibaras)
 const ZONE_MARGIN = 0.012;         // las zonas aparecen un poco antes de su p_ini para evitar saltos
 const CELL = 160;                  // metros: celdas para agrupar instancias y poder descartarlas fuera de cámara
+const BENCH_P = [0.30, 0.85];      // puntos del recorrido que se miden al cargar (vuelo bajo y sendero, el más pesado)
+// Dentro del pasillo del sendero los muros de follaje tapan el fondo: estas zonas dejan
+// de dibujarse desde ese progreso aunque su p_fin sea mayor (comprobado cuadro a cuadro)
+const HIDDEN_FROM = { G_Relleno_Emergentes: 0.865, G_Arboles_Orilla_3: 0.865 };
 
 const root = document.documentElement;
 const host = document.getElementById('tour');
 const canvas = document.getElementById('tour-canvas');
+const veil = host?.querySelector('.tour__veil');
 const statusEl = document.getElementById('tour-status');
 const reduce = matchMedia('(prefers-reduced-motion: reduce)');
 const ease = (rate, dt) => 1 - Math.exp(-rate * dt);
@@ -47,8 +55,8 @@ const linear = (rgb) => new THREE.Color().setRGB(rgb[0], rgb[1], rgb[2], THREE.L
 /*  Aviso de carga (abajo a la izquierda, no bloquea la página)        */
 /* ------------------------------------------------------------------ */
 const MSG = {
-    es: { loading: 'Cargando el recorrido 3D', preparing: 'Preparando la selva…', error: 'No se pudo cargar el recorrido 3D', nogl: 'Tu navegador no muestra 3D: usamos un fondo simple' },
-    en: { loading: 'Loading the 3D journey', preparing: 'Preparing the rainforest…', error: 'The 3D journey could not be loaded', nogl: 'Your browser cannot show 3D: using a simple background' }
+    es: { loading: 'Cargando el recorrido 3D', preparing: 'Preparando la selva…', tuning: 'Ajustando la calidad a tu equipo…', error: 'No se pudo cargar el recorrido 3D', nogl: 'Tu navegador no muestra 3D: usamos un fondo simple' },
+    en: { loading: 'Loading the 3D journey', preparing: 'Preparing the rainforest…', tuning: 'Tuning quality for your device…', error: 'The 3D journey could not be loaded', nogl: 'Your browser cannot show 3D: using a simple background' }
 };
 function setStatus(key, pct = null) {
     if (!statusEl) return;
@@ -58,6 +66,8 @@ function setStatus(key, pct = null) {
     statusEl.classList.remove('is-done');
 }
 const hideStatus = (delay = 0) => setTimeout(() => statusEl?.classList.add('is-done'), delay);
+// deja pintar el aviso; el temporizador cubre las pestañas en segundo plano (ahí no corre requestAnimationFrame)
+const nextPaint = () => new Promise((r) => { requestAnimationFrame(() => setTimeout(r, 0)); setTimeout(r, 80); });
 
 /* ------------------------------------------------------------------ */
 /*  Scroll → progreso del recorrido                                    */
@@ -149,41 +159,69 @@ function loop(now) {
     const swaying = Math.abs(sx) + Math.abs(sy) > 1e-4;
     const moving = Math.abs(dp) > 1e-5 || swaying;
 
-    // El logo flota sobre la escena siguiendo al puntero
-    const mx = still ? 0 : sway.x, my = still ? 0 : sway.y;
-    for (const f of floaters) {
-        const tx = mx * f.depth * 0.021 * innerWidth, ty = my * f.depth * 0.017 * innerHeight;
-        f.el.style.transform = `translate3d(${tx.toFixed(2)}px, ${ty.toFixed(2)}px, 0)`;
+    // El logo flota sobre la escena siguiendo al puntero (solo mientras el hero se ve)
+    const heroVisible = !inView() && scrollY < innerHeight * 1.2;
+    if (heroVisible) {
+        const mx = still ? 0 : sway.x, my = still ? 0 : sway.y;
+        for (const f of floaters) {
+            const tx = mx * f.depth * 0.021 * innerWidth, ty = my * f.depth * 0.017 * innerHeight;
+            f.el.style.transform = `translate3d(${tx.toFixed(2)}px, ${ty.toFixed(2)}px, 0)`;
+        }
     }
-    // --hero: 1 arriba de la landing → 0 al bajar (aclara el cielo detrás del logo)
-    const hero = inView() ? 0 : 1 - smooth(0, innerHeight * 0.85, scrollY);
-    if (Math.abs(hero - lastHero) > 0.002) { root.style.setProperty('--hero', hero.toFixed(3)); lastHero = hero; }
+    // --hero: 1 arriba de la landing → 0 al bajar (aclara el cielo detrás del logo).
+    // Se escribe en el velo, no en <html>, para no recalcular estilos de toda la página.
+    const hero = heroVisible ? 1 - smooth(0, innerHeight * 0.85, scrollY) : 0;
+    if (veil && Math.abs(hero - lastHero) > 0.002) { veil.style.setProperty('--hero', hero.toFixed(3)); lastHero = hero; }
 
     const ambient = world ? world.update(state.cur, sway, dt, now, moving) : false;
     raf = moving || (ambient && !still) ? requestAnimationFrame(loop) : 0;
 }
 
 /* ------------------------------------------------------------------ */
-/*  Calidad según el dispositivo (y se ajusta sola si va lento)        */
+/*  Niveles de calidad                                                 */
 /* ------------------------------------------------------------------ */
+const DPR = devicePixelRatio || 1;
 const coarse = matchMedia('(pointer: coarse)').matches;
-const smallScreen = Math.min(screen.width, screen.height) < 760;
-const weak = (navigator.deviceMemory || 8) <= 4 || (navigator.hardwareConcurrency || 8) <= 4;
-const Q = {
-    dprMax: coarse || smallScreen ? 1 : Math.min(devicePixelRatio || 1, 1.5),
-    dprMin: 0.7,
-    shadows: !(coarse || smallScreen || weak),
-    antialias: !(coarse || smallScreen) && (devicePixelRatio || 1) < 2
+// algunos navegadores embebidos informan screen = 0×0: en ese caso se usa la ventana
+const smallScreen = Math.min(screen.width || innerWidth, screen.height || innerHeight) < 760;
+const gpuName = (() => {
+    try {
+        const gl = document.createElement('canvas').getContext('webgl');
+        const ext = gl?.getExtension('WEBGL_debug_renderer_info');
+        const name = ext ? gl.getParameter(ext.UNMASKED_RENDERER_WEBGL) : '';
+        gl?.getExtension('WEBGL_lose_context')?.loseContext();
+        return String(name);
+    } catch (_) { return ''; }
+})();
+const weakGPU = /Intel.*(HD|UHD) Graphics|Mali|Adreno|PowerVR|SwiftShader|llvmpipe|Basic Render/i.test(gpuName);
+
+// dpr: resolución del canvas (nunca más de 1,5 aunque la pantalla sea 2x–4x)
+// shadows: sombras en tiempo real · lambert: materiales sin PBR · idle: agua y alas animadas en reposo
+// cull: multiplica la distancia a la que se dejan de dibujar los objetos pequeños
+const TIERS = {
+    high: { dpr: Math.min(DPR, 1.5), shadows: 'soft', shadowSize: 2048, lambert: false, idle: true, cull: 1 },
+    medium: { dpr: Math.min(DPR, 1), shadows: 'hard', shadowSize: 1024, lambert: false, idle: false, cull: 0.75 },
+    low: { dpr: Math.min(DPR, 0.75), shadows: null, shadowSize: 0, lambert: true, idle: false, cull: 0.55 }
 };
+const ORDER = ['high', 'medium', 'low'];
+const DPR_FLOOR = 0.55;
+// Punto de partida antes de medir: el antialias (MSAA) solo se puede decidir al crear el contexto
+const GUESS = coarse || smallScreen || weakGPU ? 'low' : /Iris/i.test(gpuName) || (navigator.hardwareConcurrency || 8) <= 4 ? 'medium' : 'high';
+const ANTIALIAS = GUESS === 'high' && DPR < 2;
 
 /* ------------------------------------------------------------------ */
-/*  Materiales: bruma por distancia y aleteo                           */
+/*  Materiales: bruma por distancia, gradación y aleteo                */
 /* ------------------------------------------------------------------ */
 const SHARED = {
     uFogSun: { value: new THREE.Vector3() },                 // dirección del sol en espacio de vista
     uFogWarm: { value: linear([1.1, 0.77, 0.44]) },          // la bruma se calienta mirando al sol
     uTime: { value: 0 }
 };
+// Gradación de los renders de Blender (+25 % saturación, +6 % contraste) dentro del shader:
+// sale gratis, mientras que un filter: CSS sobre el canvas suma una pasada de pantalla completa
+const GRADE_GLSL = /* glsl */`
+    float gradeL = dot(gl_FragColor.rgb, vec3(0.2126, 0.7152, 0.0722));
+    gl_FragColor.rgb = (mix(vec3(gradeL), gl_FragColor.rgb, 1.25) - 0.5) * 1.06 + 0.5;`;
 // Bruma como en los renders de Blender: 1 - e^(-d / 2400 m), máximo 92 %
 const FOG_GLSL = /* glsl */`
 #ifdef USE_FOG
@@ -191,7 +229,8 @@ const FOG_GLSL = /* glsl */`
     float toSun = max(dot(normalize(-vViewPosition), uFogSun), 0.0);
     vec3 fogC = mix(fogColor, uFogWarm, pow(toSun, 5.0) * 0.8);
     gl_FragColor.rgb = mix(gl_FragColor.rgb, fogC, fogF);
-#endif`;
+#endif
+${GRADE_GLSL}`;
 // Aleteo de guacamayas y morfos en vuelo: las alas (eje X local) giran sobre el cuerpo
 const FLAP_GLSL = /* glsl */`
 #include <begin_vertex>
@@ -233,10 +272,22 @@ function flapMaterial(src, kind) {
     return flapCache.get(key);
 }
 
+// Nivel bajo: la misma apariencia con MeshLambertMaterial (sin el cálculo PBR por píxel)
+const LAMBERT_KEYS = ['name', 'color', 'map', 'normalMap', 'normalScale', 'emissive', 'emissiveMap', 'emissiveIntensity',
+    'vertexColors', 'transparent', 'opacity', 'alphaTest', 'side', 'blending', 'depthWrite'];
+function toLambert(src) {
+    const m = new THREE.MeshLambertMaterial();
+    for (const k of LAMBERT_KEYS) if (src[k] !== undefined) m[k] = src[k]?.isColor || src[k]?.isVector2 ? src[k].clone() : src[k];
+    m.defines = Object.fromEntries(Object.entries(src.defines || {}).filter(([k]) => k.startsWith('FLAP')));
+    m.onBeforeCompile = src.onBeforeCompile;
+    if (src.envMap) { m.envMap = src.envMap; m.combine = THREE.MixOperation; m.reflectivity = 0.5; }
+    return m;
+}
+
 /* ------------------------------------------------------------------ */
 /*  Cielo degradado con halo solar (mismo cálculo que preview.py)      */
 /* ------------------------------------------------------------------ */
-function makeSky(sunDir, colors = {}) {
+function makeSky(sunDir, colors = {}, grade = true) {
     const c = { top: LIGHT.skyTop, mid: LIGHT.skyMid, hor: LIGHT.skyHorizon, fog: LIGHT.fog, ...colors };
     return new THREE.ShaderMaterial({
         side: THREE.BackSide, depthTest: false, depthWrite: false, fog: false,
@@ -266,6 +317,7 @@ function makeSky(sunDir, colors = {}) {
                 sky += glow * (uWarm - sky) * clamp(glow, 0.0, 1.0);
                 gl_FragColor = vec4(sky, 1.0);
                 #include <colorspace_fragment>
+                ${grade ? GRADE_GLSL : ''}
             }`
     });
 }
@@ -309,11 +361,38 @@ function instanceZone(zone) {
     empty.forEach((o) => o.removeFromParent());
 }
 
+// Distancia máxima de dibujo según el tamaño real del objeto: una heliconia a 500 m
+// ocupa menos de un píxel y está casi cubierta por la bruma
+const drawDistance = (size) => (size < 1.5 ? 180 : size < 6 ? 450 : size < 20 ? 1100 : Infinity);
+
+function collectCullables(zone) {
+    const out = [];
+    const m = new THREE.Matrix4(), s = new THREE.Vector3(), q = new THREE.Quaternion(), p = new THREE.Vector3();
+    zone.updateMatrixWorld(true);
+    zone.traverse((o) => {
+        if (!o.isMesh) return;
+        if (!o.geometry.boundingSphere) o.geometry.computeBoundingSphere();
+        let sphere;
+        if (o.isInstancedMesh) {
+            o.getMatrixAt(0, m);
+            sphere = o.boundingSphere.clone().applyMatrix4(o.matrixWorld);
+        } else {
+            m.copy(o.matrixWorld);
+            sphere = o.geometry.boundingSphere.clone().applyMatrix4(o.matrixWorld);
+        }
+        m.decompose(p, q, s);
+        const size = o.geometry.boundingSphere.radius * Math.max(s.x, s.y, s.z);
+        const max = drawDistance(size);
+        if (max < Infinity) out.push({ obj: o, center: sphere.center, radius: sphere.radius, max });
+    });
+    return out;
+}
+
 async function init() {
     if (!host || !canvas) return;
     let renderer;
     try {
-        renderer = new THREE.WebGLRenderer({ canvas, antialias: Q.antialias, powerPreference: 'high-performance', stencil: false });
+        renderer = new THREE.WebGLRenderer({ canvas, antialias: ANTIALIAS, powerPreference: 'high-performance', stencil: false });
     } catch (err) {
         setStatus('nogl'); hideStatus(6000); return;
     }
@@ -321,7 +400,6 @@ async function init() {
     renderer.toneMapping = THREE.NoToneMapping;   // como la vista "Standard" de Blender
     renderer.setClearColor(linear(LIGHT.fog));
     renderer.shadowMap.enabled = true;
-    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     renderer.shadowMap.autoUpdate = false;        // solo se recalcula cuando la cámara se mueve
 
     setStatus('loading', 0);
@@ -335,14 +413,38 @@ async function init() {
         setStatus('error'); hideStatus(6000); renderer.dispose(); return;
     }
     setStatus('preparing');
-    await new Promise((r) => setTimeout(r, 30));   // deja pintar el aviso antes de preparar la escena
+    await nextPaint();   // deja pintar el aviso antes de preparar la escena
 
     world = buildWorld(renderer, gltf);
-    try { await renderer.compileAsync(world.scene, world.camera); } catch (_) { /* compila al primer cuadro */ }
+    draco.dispose();
+
+    // Se mide la GPU en los tramos más exigentes (peor caso: sombras recalculadas en cada cuadro).
+    // Se baja de nivel mientras el cuadro cueste más de ~28 ms y se sube mientras sobre margen
+    // (la estimación inicial por el nombre de la GPU es solo un punto de partida).
+    setStatus('tuning');
+    await nextPaint();
+    const SLOW = 28, ROOM = 14;
+    let tier = GUESS;
+    const tryTier = async (name) => { world.applyTier(name); await world.compile(); return world.benchmark(); };
+    let cost = await tryTier(tier);
+    const log = [`${tier} ${cost.toFixed(1)} ms`];
+    while (cost > SLOW && tier !== 'low') {
+        tier = ORDER[ORDER.indexOf(tier) + 1];
+        cost = await tryTier(tier);
+        log.push(`${tier} ${cost.toFixed(1)} ms`);
+    }
+    while (cost < ROOM && tier !== 'high' && !coarse) {
+        const up = ORDER[ORDER.indexOf(tier) - 1];
+        const c = await tryTier(up);
+        log.push(`${up} ${c.toFixed(1)} ms`);
+        if (c > SLOW) { await tryTier(tier); break; }
+        tier = up; cost = c;
+    }
+    console.debug('[recorrido 3D] mediciones:', log.join(' → '));
+    console.info(`[recorrido 3D] calidad ${tier} · ${cost.toFixed(1)} ms por cuadro en el tramo más pesado · ${gpuName}`);
     world.ready();
     host.classList.add('is-ready');
     hideStatus(400);
-    draco.dispose();
     wake();
 }
 
@@ -367,8 +469,6 @@ function buildWorld(renderer, gltf) {
     // Blender (Z arriba) → glTF (Y arriba): (x, y, z) → (x, z, -y)
     const SUN_DIR = new THREE.Vector3(Math.cos(el) * Math.sin(az), Math.sin(el), -Math.cos(el) * Math.cos(az)).normalize();
     const sun = new THREE.DirectionalLight(linear(LIGHT.sun), 7.5);
-    sun.castShadow = Q.shadows;
-    sun.shadow.mapSize.set(2048, 2048);
     sun.shadow.bias = -0.0004;
     sun.shadow.camera.near = 1;
     sun.shadow.camera.far = 1600;
@@ -390,14 +490,15 @@ function buildWorld(renderer, gltf) {
     const amb = LIGHT.ambient;
     envScene.add(new THREE.Mesh(new THREE.SphereGeometry(100, 48, 24), makeSky(SUN_DIR, {
         top: amb.map((v) => v * 0.8), mid: amb, hor: [0.52, 0.68, 0.86], fog: [0.52, 0.68, 0.86]
-    })));
+    }, false)));
     const pmrem = new THREE.PMREMGenerator(renderer);
     const envMap = pmrem.fromScene(envScene, 0, 0.1, 500).texture;
     pmrem.dispose();
 
-    /* --- Zonas, materiales, sombras e instancias --- */
+    /* --- Zonas, materiales, sombras, instancias y descarte por distancia --- */
     const zones = [];
     const flocks = [];
+    const cullables = [];
     let water = null;
     const NO_CAST = /^(Rio_Agua|Colinas|Terreno|Dosel_Relleno|Rayo_Luz|Muro_Follaje)/;
     const prepared = new Set();
@@ -428,12 +529,19 @@ function buildWorld(renderer, gltf) {
             o.receiveShadow = !isRay && !/^Colinas/.test(node);
         });
         instanceZone(zone);
-        zones.push({ obj: zone, p0: zone.userData.p_ini, p1: zone.userData.p_fin });
+        // terreno, dosel, río y colinas se ven siempre: no se descartan por distancia
+        if (!/^G_(Mundo_|Horizonte)/.test(zone.name)) cullables.push(...collectCullables(zone));
+        zones.push({ obj: zone, p0: zone.userData.p_ini, p1: Math.min(zone.userData.p_fin, HIDDEN_FROM[zone.name] ?? 1) });
         if (isFlock) flocks.push({ obj: zone, phase: flocks.length * 1.7 });
     }
 
+    const meshes = [];
+    scene.traverse((o) => { if (o.isMesh && o !== sky) meshes.push({ obj: o, pbr: o.material }); });
+    const lambertCache = new Map();
+    const lambertOf = (m) => { if (!lambertCache.has(m)) lambertCache.set(m, toLambert(m)); return lambertCache.get(m); };
+
     /* --- Tamaño y resolución --- */
-    let dpr = Q.dprMax, size = { w: 0, h: 0 }, portrait = 0;
+    let tier = TIERS.high, tierName = 'high', dpr = tier.dpr, size = { w: 0, h: 0 }, portrait = 0;
     const PORTRAIT_TILT = THREE.MathUtils.degToRad(8);
     function resize(force = false) {
         const w = host.clientWidth, h = host.clientHeight;
@@ -442,7 +550,8 @@ function buildWorld(renderer, gltf) {
         renderer.setPixelRatio(dpr);
         renderer.setSize(w, h, false);
         const aspect = w / h;
-        portrait = Math.min(1, Math.max(0, (1 - aspect) / 0.5));
+        // 0 en panorámico (16:9) → 1 en el teléfono vertical
+        portrait = Math.min(1, Math.max(0, (1.45 - aspect) / 0.95));
         // Mantiene los 73,7° horizontales de la lente de 24 mm, sin deformar en pantallas verticales
         const vfov = 2 * Math.atan(0.75 / aspect);
         camera.aspect = aspect;
@@ -478,32 +587,30 @@ function buildWorld(renderer, gltf) {
         }
     }
 
-    /* --- Ajuste automático de calidad --- */
-    let frameAvg = 16, slowFrames = 0, warmup = 90;
-    function adapt(dtMs) {
-        if (warmup > 0) { warmup--; return; }
-        frameAvg += (dtMs - frameAvg) * 0.06;
-        if (frameAvg < 34) { slowFrames = 0; return; }
-        if (++slowFrames < 50) return;
-        slowFrames = 0; warmup = 60;
-        if (dpr > Q.dprMin + 0.01) { dpr = Math.max(Q.dprMin, dpr * 0.8); resize(true); }
-        else if (sun.castShadow) { sun.castShadow = false; scene.traverse((o) => { if (o.material) o.material.needsUpdate = true; }); }
+    /* --- Niveles de calidad --- */
+    function applyTier(name) {
+        tierName = name; tier = TIERS[name];
+        dpr = tier.dpr;
+        resize(true);
+        sun.castShadow = !!tier.shadows;
+        renderer.shadowMap.type = tier.shadows === 'hard' ? THREE.PCFShadowMap : THREE.PCFSoftShadowMap;
+        if (tier.shadows && sun.shadow.mapSize.x !== tier.shadowSize) {
+            sun.shadow.mapSize.set(tier.shadowSize, tier.shadowSize);
+            sun.shadow.map?.dispose(); sun.shadow.map = null;
+            shadowSpan = 0;
+        }
+        for (const m of meshes) m.obj.material = tier.lambert ? lambertOf(m.pbr) : m.pbr;
+        for (const m of meshes) m.obj.material.needsUpdate = true;
+        // sin MSAA de sobra, el vidrio del menú tampoco necesita desenfoque en el nivel bajo
+        root.classList.toggle('tour-lite', name === 'low');
+        root.classList.toggle('tour-hq', name === 'high');
+        lastP = -1; needsRender = true; renderer.shadowMap.needsUpdate = true;
+        if (window.PYTOUR) window.PYTOUR.tier = name;
     }
 
-    /* --- Cuadro --- */
-    let lastP = -1, lastRender = 0, lastSwayX = 0, lastSwayY = 0, needsRender = true;
-    function update(p, sw, dt, now, moving) {
-        const resized = resize();
-        const still = reduce.matches;
-        const moved = Math.abs(p - lastP) > 1e-6 || Math.abs(sw.x - lastSwayX) > 1e-5 || Math.abs(sw.y - lastSwayY) > 1e-5;
-        // en reposo basta con ~30 cuadros por segundo para el agua y las alas
-        const due = !still && now - lastRender > 32;
-        if (!(moved || resized || needsRender || due)) return !still;
-
-        if (moving && dt < 0.09) adapt(dt * 1000);   // ignora tirones aislados (pestaña oculta, compilación)
-        if (Math.abs(p - lastP) > 1e-6) {
-            for (const z of zones) z.obj.visible = p >= z.p0 - ZONE_MARGIN && p <= z.p1 + ZONE_MARGIN;
-        }
+    // Visibilidad por zona (rango del scroll) + descarte de objetos pequeños lejanos
+    function stage(p, sw = { x: 0, y: 0 }) {
+        for (const z of zones) z.obj.visible = p >= z.p0 - ZONE_MARGIN && p <= z.p1 + ZONE_MARGIN;
         const t = Math.min(duration, Math.max(0, p * duration));
         camera.position.fromArray(posAt.evaluate(t));
         baseQ.fromArray(rotAt.evaluate(t));
@@ -514,11 +621,74 @@ function buildWorld(renderer, gltf) {
         camera.quaternion.copy(baseQ).multiply(swayQ.setFromEuler(swayE));
         camera.updateMatrixWorld();
         sky.position.copy(camera.position);
-
-        if (moved || resized || needsRender) { placeShadow(p); renderer.shadowMap.needsUpdate = true; }
+        const k = tier.cull;
+        for (const c of cullables) c.obj.visible = camera.position.distanceTo(c.center) - c.radius < c.max * k;
         SHARED.uFogSun.value.copy(SUN_DIR).transformDirection(camera.matrixWorldInverse);
+    }
 
-        if (!still) {
+    // Costo real de un cuadro (CPU + GPU, con sombras recalculadas) en los tramos más pesados
+    function benchmark() {
+        const gl = renderer.getContext();
+        let worst = 0;
+        for (const p of BENCH_P) {
+            stage(p); placeShadow(p);
+            // dos cuadros de calentamiento: suben geometrías y texturas, y en Windows (ANGLE)
+            // terminan de compilar los shaders en el primer dibujo real
+            for (let i = 0; i < 2; i++) { renderer.shadowMap.needsUpdate = true; renderer.render(scene, camera); }
+            gl.finish();
+            const times = [];
+            for (let i = 0; i < 5; i++) {
+                const t0 = performance.now();
+                renderer.shadowMap.needsUpdate = true;
+                renderer.render(scene, camera);
+                gl.finish();
+                times.push(performance.now() - t0);
+            }
+            times.sort((a, b) => a - b);
+            worst = Math.max(worst, times[2]);
+        }
+        return worst;
+    }
+
+    async function compile() {
+        for (const z of zones) z.obj.visible = true;
+        for (const c of cullables) c.obj.visible = true;
+        try { await renderer.compileAsync(scene, camera); } catch (_) { /* compila al primer cuadro */ }
+    }
+
+    /* --- Ajuste automático en marcha: si va lento baja de nivel, y luego la resolución --- */
+    let frameAvg = 16, slowFrames = 0, warmup = 90;
+    function adapt(dtMs) {
+        if (warmup > 0) { warmup--; return; }
+        frameAvg += (dtMs - frameAvg) * 0.06;
+        if (frameAvg < 34) { slowFrames = 0; return; }
+        if (++slowFrames < 45) return;
+        slowFrames = 0; warmup = 90; frameAvg = 16;
+        if (tierName !== 'low') applyTier(ORDER[ORDER.indexOf(tierName) + 1]);
+        else if (dpr > DPR_FLOOR + 0.01) { dpr = Math.max(DPR_FLOOR, dpr * 0.8); resize(true); }
+    }
+
+    /* --- Cuadro --- */
+    let lastP = -1, lastRender = 0, lastSwayX = 0, lastSwayY = 0, needsRender = true, shadowTick = 0;
+    function update(p, sw, dt, now, moving) {
+        const resized = resize();
+        const still = reduce.matches;
+        const animate = tier.idle && !still;
+        const moved = Math.abs(p - lastP) > 1e-6 || Math.abs(sw.x - lastSwayX) > 1e-5 || Math.abs(sw.y - lastSwayY) > 1e-5;
+        // en reposo: nivel alto ~30 cuadros/s para el agua y las alas; medio y bajo no dibujan nada
+        const due = animate && now - lastRender > 32;
+        if (!(moved || resized || needsRender || due)) return animate;
+
+        if (moving && dt < 0.09) adapt(dt * 1000);   // ignora tirones aislados (pestaña oculta, compilación)
+        stage(p, sw);
+
+        if (moved || resized || needsRender) {
+            placeShadow(p);
+            // nivel medio: la sombra se recalcula uno de cada tres cuadros mientras la cámara avanza
+            shadowTick++;
+            if (tierName !== 'medium' || !moving || shadowTick % 3 === 0) renderer.shadowMap.needsUpdate = true;
+        }
+        if (animate) {
             const s = now / 1000;
             SHARED.uTime.value = s;
             if (water?.normalMap) water.normalMap.offset.set(s * 0.004, -s * 0.012);
@@ -527,12 +697,11 @@ function buildWorld(renderer, gltf) {
 
         renderer.render(scene, camera);
         lastP = p; lastSwayX = sw.x; lastSwayY = sw.y; lastRender = now; needsRender = false;
-        return !still;
+        return animate;
     }
 
     function ready() {
         resize(true);
-        for (const z of zones) z.obj.visible = true;
         renderer.shadowMap.needsUpdate = true;
         needsRender = true;
         lastP = -1;
@@ -541,9 +710,9 @@ function buildWorld(renderer, gltf) {
     canvas.addEventListener('webglcontextlost', (e) => { e.preventDefault(); host.classList.remove('is-ready'); });
     canvas.addEventListener('webglcontextrestored', () => { needsRender = true; host.classList.add('is-ready'); wake(); });
 
-    // Para depurar desde la consola: PYTOUR.renderer.info.render
-    window.PYTOUR = { renderer, scene, camera, zones, state, quality: Q, sun, fill, hemi, sky: skyMat, water };
-    return { scene, camera, update, ready };
+    // Para depurar desde la consola: PYTOUR.tier, PYTOUR.renderer.info.render
+    window.PYTOUR = { renderer, scene, camera, zones, state, sun, water, gpu: gpuName, tier: tierName, applyTier, benchmark };
+    return { scene, camera, update, ready, applyTier, compile, benchmark };
 }
 
 wake();
