@@ -28,7 +28,9 @@
             document.head.append(l);
         })();
     </script>
-    <link rel="stylesheet" href="styles.css">
+    <!-- ?v=… obliga al navegador a descargar la versión nueva (GitHub Pages deja usar la vieja
+         hasta 10 min). Al subir cambios, sube este número aquí y en los <script> del final -->
+    <link rel="stylesheet" href="styles.css?v=1.2">
 
     <script type="importmap">
     {
@@ -443,9 +445,10 @@
             setTimeout(() => s.classList.add('is-done'), 9000);
         }
     </script>
-    <script src="data.js"></script>
-    <script src="main.js"></script>
-    <script src="views.js"></script>
-    <script type="module" src="tour3d.js"></script>
+    <!-- misma versión que styles.css (arriba): súbela en todos al publicar cambios -->
+    <script src="data.js?v=1.2"></script>
+    <script src="main.js?v=1.2"></script>
+    <script src="views.js?v=1.2"></script>
+    <script type="module" src="tour3d.js?v=1.2"></script>
 </body>
 </html>
