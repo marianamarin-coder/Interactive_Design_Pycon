@@ -335,3 +335,24 @@
 
     if (store.get('pycon-lang') === 'en') setLang('en');
 })();
+
+/*Boton deshabilitado*/
+
+const boton = document.getElementById('mentoria');
+
+boton.addEventListener('click', function(evento) {
+  // Verificamos si el botón tiene la clase de deshabilitado
+  if (boton.classList.contains('btn-deshabilitado')) {
+    // Evitamos cualquier acción por defecto
+    evento.preventDefault(); 
+    
+    // Mostramos el aviso de advertencia
+    alert('Convocatoria cerrada.');
+    
+    return; // Detiene la función aquí
+  }
+
+  // Código que se ejecuta si el botón SÍ está habilitado de verdad
+  console.log('¡Formulario enviado con éxito!');
+});
+
