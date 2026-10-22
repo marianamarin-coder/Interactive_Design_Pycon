@@ -55,14 +55,14 @@ const linear = (rgb) => new THREE.Color().setRGB(rgb[0], rgb[1], rgb[2], THREE.L
 /*  Aviso de carga (abajo a la izquierda, no bloquea la página)        */
 /* ------------------------------------------------------------------ */
 const MSG = {
-    es: { loading: 'Cargando el recorrido 3D', preparing: 'Preparando la selva…', tuning: 'Ajustando la calidad a tu equipo…', error: 'No se pudo cargar el recorrido 3D', nogl: 'Tu navegador no muestra 3D: usamos un fondo simple' },
-    en: { loading: 'Loading the 3D journey', preparing: 'Preparing the rainforest…', tuning: 'Tuning quality for your device…', error: 'The 3D journey could not be loaded', nogl: 'Your browser cannot show 3D: using a simple background' }
+    es: { loading: 'Cargando el recorrido 3D', preparing: 'Preparando la selva…', tuning: 'Ajustando la calidad a tu equipo…', error: 'No se pudo cargar el recorrido 3D', lite: 'Modo ligero: fondo simple para ahorrar datos', nogl: 'Tu navegador no muestra 3D: usamos un fondo simple' },
+    en: { loading: 'Loading the 3D journey', preparing: 'Preparing the rainforest…', tuning: 'Tuning quality for your device…', error: 'The 3D journey could not be loaded', lite: 'Light mode: simple background to save data', nogl: 'Your browser cannot show 3D: using a simple background' }
 };
 function setStatus(key, pct = null) {
     if (!statusEl) return;
     statusEl.querySelector('.tour-status__text').textContent = (MSG[root.lang] || MSG.es)[key];
     statusEl.style.setProperty('--p', pct == null ? 1 : pct.toFixed(3));
-    statusEl.classList.toggle('is-error', key === 'error' || key === 'nogl');
+    statusEl.classList.toggle('is-error', key === 'error' || key === 'nogl' || key === 'lite');
     statusEl.classList.remove('is-done');
 }
 const hideStatus = (delay = 0) => setTimeout(() => statusEl?.classList.add('is-done'), delay);
@@ -198,12 +198,19 @@ const weakGPU = /Intel.*(HD|UHD) Graphics|Mali|Adreno|PowerVR|SwiftShader|llvmpi
 // dpr: resolución del canvas (nunca más de 1,5 aunque la pantalla sea 2x–4x)
 // shadows: sombras en tiempo real · lambert: materiales sin PBR · idle: agua y alas animadas en reposo
 // cull: multiplica la distancia a la que se dejan de dibujar los objetos pequeños
+// maxFps: tope de cuadros por segundo mientras se hace scroll (equipos muy débiles: el
+// scroll de la página sigue fluido porque la GPU no se satura; al soltar se dibuja el final)
 const TIERS = {
     high: { dpr: Math.min(DPR, 1.5), shadows: 'soft', shadowSize: 2048, lambert: false, idle: true, cull: 1 },
     medium: { dpr: Math.min(DPR, 1), shadows: 'hard', shadowSize: 1024, lambert: false, idle: false, cull: 0.75 },
-    low: { dpr: Math.min(DPR, 0.75), shadows: null, shadowSize: 0, lambert: true, idle: false, cull: 0.55 }
+    low: { dpr: Math.min(DPR, 0.75), shadows: null, shadowSize: 0, lambert: true, idle: false, cull: 0.55 },
+    minimal: { dpr: Math.min(DPR, 0.6), shadows: null, shadowSize: 0, lambert: true, idle: false, cull: 0.4, maxFps: 12 }
 };
-const ORDER = ['high', 'medium', 'low'];
+const ORDER = ['high', 'medium', 'low', 'minimal'];
+// Modo ligero: con ahorro de datos, conexión 2G o muy poca memoria no se descargan los
+// 9 MB del modelo; queda el fondo de atardecer en CSS y la página funciona igual
+const conn = navigator.connection || {};
+const LITE = !!conn.saveData || /2g$/.test(conn.effectiveType || '') || (navigator.deviceMemory || 8) < 2;
 const DPR_FLOOR = 0.55;
 // Punto de partida antes de medir: el antialias (MSAA) solo se puede decidir al crear el contexto
 const GUESS = coarse || smallScreen || weakGPU ? 'low' : /Iris/i.test(gpuName) || (navigator.hardwareConcurrency || 8) <= 4 ? 'medium' : 'high';
@@ -390,6 +397,7 @@ function collectCullables(zone) {
 
 async function init() {
     if (!host || !canvas) return;
+    if (LITE) { root.classList.add('tour-lite'); setStatus('lite'); hideStatus(6000); return; }
     let renderer;
     try {
         renderer = new THREE.WebGLRenderer({ canvas, antialias: ANTIALIAS, powerPreference: 'high-performance', stencil: false });
@@ -428,7 +436,7 @@ async function init() {
     const tryTier = async (name) => { world.applyTier(name); await world.compile(); return world.benchmark(); };
     let cost = await tryTier(tier);
     const log = [`${tier} ${cost.toFixed(1)} ms`];
-    while (cost > SLOW && tier !== 'low') {
+    while (cost > SLOW && tier !== 'minimal') {
         tier = ORDER[ORDER.indexOf(tier) + 1];
         cost = await tryTier(tier);
         log.push(`${tier} ${cost.toFixed(1)} ms`);
@@ -602,7 +610,7 @@ function buildWorld(renderer, gltf) {
         for (const m of meshes) m.obj.material = tier.lambert ? lambertOf(m.pbr) : m.pbr;
         for (const m of meshes) m.obj.material.needsUpdate = true;
         // sin MSAA de sobra, el vidrio del menú tampoco necesita desenfoque en el nivel bajo
-        root.classList.toggle('tour-lite', name === 'low');
+        root.classList.toggle('tour-lite', name === 'low' || name === 'minimal');
         root.classList.toggle('tour-hq', name === 'high');
         lastP = -1; needsRender = true; renderer.shadowMap.needsUpdate = true;
         if (window.PYTOUR) window.PYTOUR.tier = name;
@@ -664,7 +672,7 @@ function buildWorld(renderer, gltf) {
         if (frameAvg < 34) { slowFrames = 0; return; }
         if (++slowFrames < 45) return;
         slowFrames = 0; warmup = 90; frameAvg = 16;
-        if (tierName !== 'low') applyTier(ORDER[ORDER.indexOf(tierName) + 1]);
+        if (tierName !== 'minimal') applyTier(ORDER[ORDER.indexOf(tierName) + 1]);
         else if (dpr > DPR_FLOOR + 0.01) { dpr = Math.max(DPR_FLOOR, dpr * 0.8); resize(true); }
     }
 
@@ -678,6 +686,8 @@ function buildWorld(renderer, gltf) {
         // en reposo: nivel alto ~30 cuadros/s para el agua y las alas; medio y bajo no dibujan nada
         const due = animate && now - lastRender > 32;
         if (!(moved || resized || needsRender || due)) return animate;
+        // nivel mínimo: mientras el scroll sigue se dibuja a lo sumo 12 veces por segundo
+        if (tier.maxFps && moving && !resized && !needsRender && now - lastRender < 1000 / tier.maxFps) return animate;
 
         if (moving && dt < 0.09) adapt(dt * 1000);   // ignora tirones aislados (pestaña oculta, compilación)
         stage(p, sw);

@@ -7,13 +7,27 @@
     <meta name="description" content="PyCon Colombia 2028 — la conferencia de Python más grande de Colombia. Edición Amazonía: charlas, keynotes, talleres y comunidad en Medellín.">
     <meta name="theme-color" content="#DDF3EE">
 
+    <!-- Favicon: el símbolo de Python del logo (SVG; PNG de respaldo y para iPhone) -->
+    <link rel="icon" href="favicon.svg" type="image/svg+xml">
+    <link rel="icon" href="favicon-32.png" type="image/png" sizes="32x32">
+    <link rel="apple-touch-icon" href="apple-touch-icon.png">
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <!-- Poppins: tipografía del Figma "botones y tarjetas pycon" -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
-    <!-- Recorrido 3D: el modelo (9 MB, Draco) empieza a descargarse de inmediato -->
-    <link rel="preload" href="assets/3d/recorrido-amazonas.glb" as="fetch" type="model/gltf-binary" crossorigin>
+    <!-- Recorrido 3D: el modelo (9 MB, Draco) empieza a descargarse de inmediato,
+         salvo con ahorro de datos, conexión 2G o muy poca memoria (modo ligero de tour3d.js) -->
+    <script>
+        (() => {
+            const c = navigator.connection || {};
+            if (c.saveData || /2g$/.test(c.effectiveType || '') || (navigator.deviceMemory || 8) < 2) return;
+            const l = document.createElement('link');
+            Object.assign(l, { rel: 'preload', href: 'assets/3d/recorrido-amazonas.glb', as: 'fetch', type: 'model/gltf-binary', crossOrigin: 'anonymous' });
+            document.head.append(l);
+        })();
+    </script>
     <link rel="stylesheet" href="styles.css">
 
     <script type="importmap">
@@ -55,9 +69,19 @@
             </a>
 
             <nav class="main-nav" id="main-nav" aria-label="Menú principal">
-                <a href="#/keynotes" data-route="keynotes">Keynotes</a>
-                <a href="#ponentes" data-i18n="nav.speakers">Ponentes</a>
-                <a href="#/agenda" data-route="agenda" data-i18n="nav.schedule">Agenda</a>
+                <a href="#inicio" data-home data-i18n="nav.home">Inicio</a>
+                <!-- Desplegable: el primer "Agenda" solo abre las opciones; el de adentro lleva a la pantalla de agenda -->
+                <div class="nav-group">
+                    <button type="button" class="nav-group__toggle" aria-expanded="false" aria-controls="nav-program">
+                        <span data-i18n="nav.schedule">Agenda</span>
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+                    </button>
+                    <div class="nav-group__menu" id="nav-program">
+                        <a href="#keynotes">Keynotes</a>
+                        <a href="#ponentes" data-i18n="nav.speakers">Ponentes</a>
+                        <a href="#/agenda" data-route="agenda" data-i18n="nav.scheduleGo">Agenda</a>
+                    </div>
+                </div>
                 <a href="#/patrocinadores" data-route="patrocinadores" data-i18n="nav.sponsors">Patrocinadores</a>
                 <a href="#lugar" data-i18n="nav.venue">Lugar</a>
                 <a href="#/codigo-de-conducta" data-route="codigo-de-conducta" data-i18n="nav.coc">Código de conducta</a>
@@ -110,7 +134,7 @@
                 </div>
 
                 <div class="hero__ctas">
-                    <a class="btn btn--primary" href="#boletas" data-i18n="cta.tickets">Obtén tu boleta</a>
+                    <a class="btn btn--primary" href="https://www.eventbrite.co/e/pycon-colombia-2026-tickets-1986172567616?aff=ebdssbdestsearch" data-i18n="cta.tickets" target="_blank">Obtén tu boleta</a>
                     <a class="btn btn--glass glass" href="#ponentes" data-i18n="cta.speakers">Conoce a los ponentes</a>
                 </div>
             </div>
@@ -147,7 +171,7 @@
                     <li class="stat"><b data-count="600">0</b><span data-i18n="stats.people">+ asistentes</span></li>
                     <li class="stat"><b data-stat="talk">0</b><span data-i18n="stats.talks">charlas</span></li>
                     <li class="stat"><b data-stat="workshop">0</b><span data-i18n="stats.workshops">talleres</span></li>
-                    <li class="stat"><a href="#/keynotes" class="stat__link"><b data-stat="keynote">0</b><span data-i18n="stats.keynotes">keynotes</span></a></li>
+                    <li class="stat"><a href="#keynotes" class="stat__link"><b data-stat="keynote">0</b><span data-i18n="stats.keynotes">keynotes</span></a></li>
                 </ul>
             </div>
         </section>
@@ -156,62 +180,61 @@
             <header class="section-head card reveal">
                 <p class="eyebrow" data-i18n="tk.kicker">Únete a la manada</p>
                 <h2 class="title title--xl" id="tickets-title" data-i18n="tk.title">Boletas</h2>
-                <p data-i18n="tk.lead">Precios en pesos colombianos. Todas incluyen los 3 días, alimentación y kit de bienvenida.</p>
+                <p data-i18n="tk.lead">Una sola boleta para toda la conferencia. Precio en pesos colombianos.</p>
             </header>
-            <ul class="tickets">
-                <li class="card ticket reveal">
-                    <h3 data-i18n="tk.student">Estudiante</h3>
-                    <p class="ticket__price" data-i18n="tk.p1">$180.000 <small>COP</small></p>
-                    <ul class="checks">
-                        <li data-i18n="tk.all">Acceso a los 3 días</li>
-                        <li data-i18n="tk.food">Alimentación incluida</li>
-                        <li data-i18n="tk.studentReq">Requiere carné vigente</li>
-                    </ul>
-                    <a class="btn btn--outline" href="#" data-i18n="tk.buy">Comprar</a>
-                </li>
-                <li class="card card--frame ticket ticket--featured reveal">
-                    <span class="ticket__badge" data-i18n="tk.popular">Más popular</span>
-                    <h3 data-i18n="tk.general">General</h3>
-                    <p class="ticket__price" data-i18n="tk.p2">$350.000 <small>COP</small></p>
-                    <ul class="checks">
-                        <li data-i18n="tk.all">Acceso a los 3 días</li>
-                        <li data-i18n="tk.food">Alimentación incluida</li>
-                        <li data-i18n="tk.kit">Kit y camiseta oficial</li>
-                    </ul>
-                    <a class="btn btn--primary" href="#" data-i18n="tk.buy">Comprar</a>
-                </li>
-                <li class="card ticket reveal">
-                    <h3 data-i18n="tk.corp">Corporativa</h3>
-                    <p class="ticket__price" data-i18n="tk.p3">$750.000 <small>COP</small></p>
-                    <ul class="checks">
-                        <li data-i18n="tk.all">Acceso a los 3 días</li>
-                        <li data-i18n="tk.invoice">Factura electrónica</li>
-                        <li data-i18n="tk.support">Apoyas a la comunidad</li>
-                    </ul>
-                    <a class="btn btn--outline" href="#" data-i18n="tk.buy">Comprar</a>
-                </li>
-                <li class="card ticket reveal">
-                    <h3 data-i18n="tk.grant">Becas</h3>
-                    <p class="ticket__price" data-i18n="tk.free">Gratis</p>
-                    <ul class="checks">
-                        <li data-i18n="tk.grant1">Para quienes no pueden pagar</li>
-                        <li data-i18n="tk.grant2">Apoyo de viaje y hospedaje</li>
-                        <li data-i18n="tk.grant3">Prioridad a grupos subrepresentados</li>
-                    </ul>
-                    <a class="btn btn--outline" href="#" data-i18n="tk.apply">Aplicar</a>
-                </li>
-            </ul>
+            <!-- Única opción de compra: 200 USD (en español se muestra en pesos, 1 USD ≈ 4.000 COP).
+                 A la derecha, más angosta, la tarjeta de becas lleva al formulario (#/beca) -->
+            <div class="tickets-row">
+            <div class="card card--frame ticket ticket--single reveal">
+                <div class="ticket__main">
+                    <h3 data-i18n="tk.general">Boleta general</h3>
+                    <p class="ticket__price" data-i18n="tk.price">$800.000 <small>COP</small></p>
+                    <p class="muted" data-i18n="tk.note">Precio único por persona · Incluye los 3 días</p>
+                </div>
+                <ul class="checks">
+                    <li data-i18n="tk.all">Acceso a los 3 días: charlas, talleres y keynotes</li>
+                    <li data-i18n="tk.food">Alimentación incluida</li>
+                    <li data-i18n="tk.kit">Kit de bienvenida y camiseta oficial</li>
+                    <li data-i18n="tk.party">Fiesta de la comunidad del sábado</li>
+                </ul>
+                <a class="btn btn--primary" href="https://www.eventbrite.co/e/pycon-colombia-2026-tickets-1986172567616?aff=ebdssbdestsearch" data-i18n="tk.buy" target="_blank">Comprar boleta</a>
+            </div>
+            <div class="card ticket ticket--grant reveal">
+                <p class="eyebrow" data-i18n="tk.grantKicker">Becas</p>
+                <h3 data-i18n="tk.grantTitle">¿No puedes pagar la boleta?</h3>
+                <p class="muted" data-i18n="tk.grantP">Aplica a una beca: cubre la boleta y puede incluir apoyo de viaje y hospedaje.</p>
+                <a class="btn btn--outline" href="#/beca" data-i18n="tk.apply">Aplicar</a>
+            </div>
+            </div>
         </section>
 
-        <!-- Keynotes y patrocinadores tienen su propia página (#/keynotes, #/patrocinadores) -->
+        <!-- ===================== KEYNOTES ===================== -->
+        <section class="section" id="keynotes" aria-labelledby="keynotes-title" data-tour="0.33">
+            <header class="section-head card reveal">
+                <p class="eyebrow">Keynotes</p>
+                <h2 class="title title--xl" id="keynotes-title" data-i18n="kn.title">Keynotes, <span>las voces que abren y cierran cada día</span></h2>
+            </header>
+            <ul class="speakers speakers--keynotes" id="keynotes-list"></ul>
+        </section>
+
+        <!-- Los patrocinadores tienen su propia pantalla (#/patrocinadores) -->
 
         <!-- ===================== PONENTES ===================== -->
-        <section class="section" id="ponentes" aria-labelledby="speakers-title" data-tour="0.36">
+        <section class="section" id="ponentes" aria-labelledby="speakers-title" data-tour="0.4">
             <header class="section-head card reveal">
                 <p class="eyebrow" data-i18n="sp.kicker">Ponentes</p>
                 <h2 class="title title--xl" id="speakers-title" data-i18n="sp.title">Te presentamos a los ponentes, <span>las voces detrás de las charlas</span></h2>
             </header>
-            <ul class="speakers" id="speakers-list"></ul>
+            <!-- Una sola fila que se desliza (con el dedo, la rueda o las flechas) -->
+            <div class="carousel">
+                <button class="carousel__btn carousel__btn--prev" type="button" data-carousel="-1" aria-label="Ponentes anteriores">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#ico-back"/></svg>
+                </button>
+                <ul class="speakers speakers--row" id="speakers-list" tabindex="0" aria-label="Ponentes"></ul>
+                <button class="carousel__btn carousel__btn--next" type="button" data-carousel="1" aria-label="Más ponentes">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#ico-next"/></svg>
+                </button>
+            </div>
         </section>
 
         <!-- ===================== ACCESO A LA AGENDA (página aparte) ===================== -->
@@ -318,8 +341,8 @@
             <nav aria-label="Ediciones anteriores">
                 <p class="site-footer__h" data-i18n="ft.past">Ediciones anteriores</p>
                 <ul>
-                    <li><a href="https://2026.pycon.co/">2026</a></li>
-                    <li><a href="https://2025.pycon.co/">2025</a></li>
+                    <li><a href="https://2026.pycon.co/" target="_blank">2026</a></li>
+                    <li><a href="https://2025.pycon.co/" target="_blank">2025</a></li>
                     <li><a href="#">2024</a></li>
                     <li><a href="#">2023</a></li>
                 </ul>
@@ -329,7 +352,7 @@
                 <ul>
                     <li><a href="#/codigo-de-conducta" data-i18n="nav.coc">Código de conducta</a></li>
                     <li><a href="#/agenda" data-i18n="nav.schedule">Agenda</a></li>
-                    <li><a href="#/keynotes">Keynotes</a></li>
+                    <li><a href="#keynotes">Keynotes</a></li>
                     <li><a href="#/patrocinadores" data-i18n="nav.sponsors">Patrocinadores</a></li>
                     <li><a href="#faq">FAQ</a></li>
                 </ul>
@@ -337,11 +360,11 @@
             <div>
                 <p class="site-footer__h" data-i18n="ft.follow">Síguenos</p>
                 <ul class="social social--footer">
-                    <li><a href="https://x.com/pyconcolombia" aria-label="X / Twitter"><svg viewBox="0 0 24 24"><use href="#ico-x"/></svg></a></li>
-                    <li><a href="https://www.facebook.com/pyconcolombia/" aria-label="Facebook"><svg viewBox="0 0 24 24"><use href="#ico-fb"/></svg></a></li>
-                    <li><a href="https://www.linkedin.com/company/pycon-colombia" aria-label="LinkedIn"><svg viewBox="0 0 24 24"><use href="#ico-in"/></svg></a></li>
-                    <li><a href="https://www.youtube.com/pyconcolombia" aria-label="YouTube"><svg viewBox="0 0 24 24"><use href="#ico-yt"/></svg></a></li>
-                    <li><a href="#" aria-label="Instagram"><svg viewBox="0 0 24 24"><use href="#ico-ig"/></svg></a></li>
+                    <li><a href="https://x.com/pyconcolombia" aria-label="X / Twitter" target="_blank"><svg viewBox="0 0 24 24"><use href="#ico-x"/></svg></a></li>
+                    <li><a href="https://www.facebook.com/pyconcolombia/" aria-label="Facebook" target="_blank"><svg viewBox="0 0 24 24"><use href="#ico-fb"/></svg></a></li>
+                    <li><a href="https://www.linkedin.com/company/pycon-colombia" aria-label="LinkedIn" target="_blank"><svg viewBox="0 0 24 24"><use href="#ico-in"/></svg></a></li>
+                    <li><a href="https://www.youtube.com/pyconcolombia" aria-label="YouTube" target="_blank"><svg viewBox="0 0 24 24"><use href="#ico-yt"/></svg></a></li>
+                    <li><a href="https://www.instagram.com/pyconcolombia/" aria-label="Instagram" target="_blank"><svg viewBox="0 0 24 24"><use href="#ico-ig"/></svg></a></li>
                 </ul>
             </div>
         </div>

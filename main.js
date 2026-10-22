@@ -17,7 +17,7 @@
        ===================================================================== */
     const EN = {
         'skip': 'Skip to content', 'menu': 'Menu', 'toTop': 'Back to top',
-        'nav.speakers': 'Speakers', 'nav.schedule': 'Schedule', 'nav.sponsors': 'Sponsors', 'nav.venue': 'Venue', 'nav.coc': 'Code of conduct',
+        'nav.home': 'Home', 'nav.scheduleGo': 'Schedule', 'nav.speakers': 'Speakers', 'nav.schedule': 'Schedule', 'nav.sponsors': 'Sponsors', 'nav.venue': 'Venue', 'nav.coc': 'Code of conduct',
         'cta.buy': 'Buy ticket', 'cta.tickets': 'Get your ticket', 'cta.speakers': 'Meet the speakers',
         'hero.city': 'City', 'hero.dateLabel': 'Date', 'hero.date': 'July 14 – 16, 2028', 'scroll': 'Explore the jungle',
         'about.kicker': 'About the conference', 'about.title': 'A community that grows like the rainforest',
@@ -30,14 +30,13 @@
         'sch.kicker': 'Program', 'sch.mine': 'My schedule',
         'teaser.title': 'Build your 3-day schedule', 'teaser.btn': 'See the schedule',
         'teaser.p': 'Browse talks, workshops and keynotes, filter by track, level or language, save your favorites and find your way to every room on campus.',
-        'tk.kicker': 'Join the pack', 'tk.title': 'Tickets', 'tk.lead': 'Prices in US dollars. All tickets include the 3 days, meals and welcome kit.',
-        // En inglés los precios van en dólares (referencia: 1 USD ≈ 4.000 COP)
-        'tk.p1': '$45 <small>USD</small>', 'tk.p2': '$90 <small>USD</small>', 'tk.p3': '$190 <small>USD</small>',
-        'tk.student': 'Student', 'tk.general': 'General', 'tk.corp': 'Corporate', 'tk.grant': 'Financial aid',
-        'tk.all': 'Access to all 3 days', 'tk.food': 'Meals included', 'tk.studentReq': 'Valid student ID required',
-        'tk.kit': 'Kit & official t-shirt', 'tk.invoice': 'Electronic invoice', 'tk.support': 'You support the community',
-        'tk.popular': 'Most popular', 'tk.buy': 'Buy', 'tk.free': 'Free', 'tk.apply': 'Apply',
-        'tk.grant1': 'For those who cannot afford it', 'tk.grant2': 'Travel & lodging support', 'tk.grant3': 'Priority for underrepresented groups',
+        'tk.kicker': 'Join the pack', 'tk.title': 'Tickets', 'tk.lead': 'A single ticket for the whole conference. Price in US dollars.',
+        // Única boleta: 200 USD (en español se muestra su equivalente en pesos)
+        'tk.general': 'General ticket', 'tk.price': '$200 <small>USD</small>', 'tk.note': 'Single price per person · Includes all 3 days',
+        'tk.all': 'Access to all 3 days: talks, workshops and keynotes', 'tk.food': 'Meals included',
+        'tk.kit': 'Welcome kit & official t-shirt', 'tk.party': 'Saturday community party', 'tk.buy': 'Buy ticket',
+        'tk.grantKicker': 'Financial aid', 'tk.grantTitle': 'Can\'t afford the ticket?', 'tk.apply': 'Apply',
+        'tk.grantP': 'Apply for a grant: it covers the ticket and may include travel and lodging support.',
         'spo.title': 'Trusted by industry leaders',
         'spo.lead': 'PyCon Colombia is made possible through the generous support of organizations dedicated to advancing the Python ecosystem and fostering technological innovation in Latin America.',
         'spo.btn': 'Become a sponsor',
@@ -61,8 +60,8 @@
         'sm.about': 'About', 'sm.session': 'Session', 'sm.viewTalk': 'View the talk'
     };
     const UI = {
-        es: { nlOk: '¡Listo! Pronto te escribiremos 🌿', nlErr: 'Escribe un email válido.', close: 'Cerrar', view: 'Ver perfil de', sponsorOf: 'Ver patrocinador' },
-        en: { nlOk: 'Done! We will write to you soon 🌿', nlErr: 'Please enter a valid email.', close: 'Close', view: 'View profile of', sponsorOf: 'View sponsor' }
+        es: { nlOk: '¡Listo! Pronto te escribiremos 🌿', nlErr: 'Escribe un email válido.', close: 'Cerrar', view: 'Ver perfil de', sponsorOf: 'Ver patrocinador', talk: 'Charla', viewTalk: 'Ver charla' },
+        en: { nlOk: 'Done! We will write to you soon 🌿', nlErr: 'Please enter a valid email.', close: 'Close', view: 'View profile of', sponsorOf: 'View sponsor', talk: 'Talk', viewTalk: 'View talk' }
     };
 
     let lang = 'es';
@@ -108,9 +107,20 @@
         if (getComputedStyle(toggle).display !== 'none') { header.classList.add('is-open'); toggle.setAttribute('aria-expanded', 'true'); }
         setTimeout(() => $('a', nav)?.focus({ preventScroll: true }), 120);
     });
-    nav.addEventListener('click', (e) => { if (e.target.closest('a')) closeNav(); });
-    addEventListener('keydown', (e) => { if (e.key === 'Escape') closeNav(); });
-    document.addEventListener('click', (e) => { if (!header.contains(e.target)) closeNav(); });
+    // Desplegable "Agenda": el botón solo abre/cierra Keynotes · Ponentes · Ver la agenda
+    const group = $('.nav-group', nav), groupBtn = $('.nav-group__toggle', group);
+    const setGroup = (open) => { group.classList.toggle('is-open', open); groupBtn.setAttribute('aria-expanded', String(open)); };
+    groupBtn.addEventListener('click', () => setGroup(!group.classList.contains('is-open')));
+
+    nav.addEventListener('click', (e) => { if (e.target.closest('a')) { setGroup(false); closeNav(); } });
+    addEventListener('keydown', (e) => {
+        if (e.key !== 'Escape') return;
+        if (group.classList.contains('is-open')) { setGroup(false); groupBtn.focus(); } else closeNav();
+    });
+    document.addEventListener('click', (e) => {
+        if (!group.contains(e.target)) setGroup(false);
+        if (!header.contains(e.target)) closeNav();
+    });
 
     const onScroll = () => {
         const inView = document.body.classList.contains('in-view');
@@ -122,18 +132,15 @@
     addEventListener('scroll', onScroll, { passive: true });
     onScroll();
 
-    const links = new Map($$('a[href^="#"]:not(.btn):not([data-route])', nav).map((a) => [a.getAttribute('href').slice(1), a]));
-    const clearActive = () => $$('a', nav).forEach((a) => { a.classList.remove('is-active'); a.removeAttribute('aria-current'); });
-    const spy = new IntersectionObserver((entries) => {
-        if (document.body.classList.contains('in-view')) return;
-        entries.forEach((entry) => {
-            if (!entry.isIntersecting) return;
-            clearActive();
-            const a = links.get(entry.target.id);
-            if (a) { a.classList.add('is-active'); a.setAttribute('aria-current', 'true'); }
-        });
-    }, { rootMargin: '-45% 0px -50% 0px' });
-    $$('#landing section[id]').forEach((s) => spy.observe(s));
+    // "Inicio" queda marcado mientras se esté en la landing (sin importar la sección);
+    // al pasar a otra pantalla (agenda, keynotes…) views.js marca el enlace de esa pantalla
+    const homeLink = $('[data-home]', nav);
+    const clearActive = () => {
+        $$('a', nav).forEach((a) => { a.classList.remove('is-active'); a.removeAttribute('aria-current'); });
+        $('.nav-group__toggle', nav).classList.remove('is-active');
+        if (!document.body.classList.contains('in-view')) { homeLink.classList.add('is-active'); homeLink.setAttribute('aria-current', 'page'); }
+    };
+    clearActive();
 
     /* Liquid glass: el reflejo especular sigue al puntero */
     $$('.glass').forEach((el) => {
@@ -163,23 +170,49 @@
     const avatarInner = (p) => (p.photo ? `<img src="${p.photo}" alt="" loading="lazy" decoding="async">` : `<span>${initials(p)}</span>`);
     const avatarHTML = (p, cls = '') => `<div class="avatar ${p.photo ? 'avatar--photo ' : ''}${cls}" style="--hue:${p.hue}" aria-hidden="true">${avatarInner(p)}</div>`;
 
+    // Tarjeta de persona: foto, nombre, cargo, bio, su charla (título, día, hora y sala),
+    // redes y "Ver charla". Tocar la tarjeta abre el perfil completo.
     function cardHTML(p) {
-        const name = pick(p.name);
+        const name = pick(p.name), ev = D.EVENTS[p.talk], day = D.DAYS[ev.day], room = D.ROOMS[ev.room];
         return `<li class="card speaker${p.tba ? ' speaker--tba' : ''}">
             <div class="inset speaker__panel">
                 <div class="speaker__photo">${avatarHTML(p)}</div>
                 <h3>${esc(name)}</h3>
                 <p class="speaker__role">${esc(pick(p.role))}</p>
             </div>
-            <p class="speaker__bio">${esc(pick(p.bio).split('. ')[0].replace(/\.$/, ''))}.</p>
+            <p class="speaker__bio">${esc(pick(p.bio))}</p>
+            <div class="speaker__talk">
+                <p class="speaker__talk-label">${UI[lang].talk}</p>
+                <p class="speaker__talk-title">${esc(pick(ev.title))}</p>
+                <p class="speaker__talk-meta">${esc(pick(day.label))} ${day.num} · ${ev.t} · ${esc(pick(room.name))}</p>
+            </div>
             <ul class="social">${socialHTML(p)}</ul>
+            <a class="btn btn--primary btn--sm speaker__cta" href="#/charla/${p.id}">${UI[lang].viewTalk}</a>
             <button class="speaker__open" type="button" data-open-speaker="${p.id}"><span class="sr-only">${UI[lang].view} ${esc(name)}</span></button>
         </li>`;
     }
-    // Los keynotes viven en su propia página (#/keynotes, en views.js)
+    // Keynotes en el orden en que suceden; ponentes en una fila deslizable
+    const byTime = (a, b) => { const ea = D.EVENTS[a.talk], eb = D.EVENTS[b.talk]; return ea.day - eb.day || ea.t.localeCompare(eb.t); };
     function renderPeople() {
+        $('#keynotes-list').innerHTML = [...D.KEYNOTES].sort(byTime).map(cardHTML).join('');
         $('#speakers-list').innerHTML = D.SPEAKERS.map(cardHTML).join('');
+        updateCarousel();
     }
+
+    /* Carrusel de ponentes: flechas que se ocultan en los extremos */
+    const row = $('#speakers-list');
+    const carouselBtns = $$('[data-carousel]');
+    function updateCarousel() {
+        const max = row.scrollWidth - row.clientWidth - 2;
+        carouselBtns.forEach((b) => { b.disabled = +b.dataset.carousel < 0 ? row.scrollLeft <= 2 : row.scrollLeft >= max; });
+    }
+    carouselBtns.forEach((b) => b.addEventListener('click', () => {
+        const card = row.querySelector('.speaker');
+        const step = card ? card.getBoundingClientRect().width + parseFloat(getComputedStyle(row).columnGap || 0) : row.clientWidth * 0.8;
+        row.scrollBy({ left: +b.dataset.carousel * step * Math.max(1, Math.floor(row.clientWidth / step)), behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+    }));
+    row.addEventListener('scroll', updateCarousel, { passive: true });
+    addEventListener('resize', updateCarousel);
 
     const modal = $('#speaker-modal');
     let openId = null, lastFocus = null;

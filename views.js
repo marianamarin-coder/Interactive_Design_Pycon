@@ -7,7 +7,6 @@
    #/agenda/mi?p=1            Mi agenda (eventos guardados)
    #/agenda/evento/d1-2       Evento + mapa del campus con la ruta a la sala
    #/charla/s0                Charla de un ponente o keynote (vista "talk" del Figma)
-   #/keynotes                 Keynotes con su información detallada
    #/patrocinadores           Patrocinadores por categoría
    #/patrocinador/ceiba       Patrocinador (vista "sponsor" del Figma)
    #/cuenta/s0/ig             Red social que aún no está habilitada
@@ -39,7 +38,7 @@
             goSchedule: 'Explorar la agenda', removeFrom: 'Quitar',
             howTo: 'Cómo llegar a', whereAreYou: '¿Dónde estás?', walk: (m, min) => `${m} m · ${min} min caminando`, replay: 'Repetir recorrido',
             steps: 'Indicaciones', start: 'Sal desde', cont: 'Continúa por', arrive: 'Llegas a', you: 'Tú', osm: 'Abrir en OpenStreetMap',
-            speaker: 'Ponente', viewSpeaker: 'Ver ponente', viewTalk: 'Ver la charla', agenda: 'Agenda de la charla', about: 'Descripción',
+            speaker: 'Ponente', viewSpeaker: 'Ver ponente', viewTalk: 'Ver la charla', agenda: 'Agenda de la charla', about: 'Descripción', learn: 'Lo que aprenderás', audience: '¿Para quién es?', duration: 'Duración',
             session: 'Sesión', backSpeakers: 'Volver a los ponentes', backKeynotes: 'Volver a los keynotes', when: 'Cuándo y dónde',
             backSponsors: 'Volver a patrocinadores', visit: 'Visitar sitio web', aboutUs: 'Sobre nosotros', aboutSponsor: 'Sobre este patrocinador',
             videos: 'Videos', becomeSponsor: 'Sé patrocinador', tierOf: 'Patrocinador',
@@ -52,13 +51,19 @@
             reportOk: (r) => `Recibimos tu reporte (referencia ${r}). El equipo de conducta lo revisará en menos de 24 horas.`, required: 'Este campo es obligatorio.',
             urgentNote: 'Si estás en peligro ahora mismo, busca a alguien del equipo organizador (camisetas naranjas) o llama a la línea de emergencias 123.',
             volTitle: 'Registro de voluntarios', volLead: 'Únete al equipo que hace posible PyCon Colombia 2028. Te contactaremos con los detalles de la inducción.',
-            phone: 'Teléfono', city: 'Ciudad', areas: '¿En qué te gustaría ayudar? *', days: '¿Qué días puedes? *', shirt: 'Talla de camiseta', exp: 'Cuéntanos de tu experiencia (opcional)',
-            cocAgree: 'Leí y acepto el código de conducta *', register: 'Enviar registro', volOk: (n) => `¡Gracias, ${n}! Recibimos tu registro como voluntario. Pronto te escribiremos 🌿`,
-            pickOne: 'Elige al menos una opción.', emailErr: 'Escribe un correo válido.', backHome: 'Volver al inicio', newReport: 'Enviar otro reporte',
-            areaOpts: ['Logística', 'Registro', 'Redes sociales', 'Diseño', 'Acompañar ponentes', 'Sprints y talleres'],
-            dayOpts: ['Viernes 14', 'Sábado 15', 'Domingo 16'],
-            kTitle: 'Keynotes, <span>las voces que abren y cierran cada día</span>',
-            kLead: (n, d) => `${n} keynotes repartidas en los ${d} días de la conferencia. Conoce a cada persona y guarda su charla en tu agenda o en tu calendario.`,
+            phone: 'Teléfono', city: 'Ciudad', shirt: 'Talla de camiseta', exp: 'Cuéntanos de tu experiencia (opcional)',
+            allDays: 'Recuerda: como voluntario debes estar disponible los 3 días del evento, del viernes 14 al domingo 16 de julio de 2028.',
+            grantKicker: 'Becas', grantTitle: 'Aplica a una beca', backTickets: 'Volver a boletas',
+            grantLead: 'Queremos que nadie se quede por fuera de PyCon Colombia por motivos económicos. Cuéntanos quién eres y por qué quieres asistir.',
+            grantCovers: ['Boleta para los 3 días, con alimentación y kit', 'Apoyo de viaje y hospedaje para quien venga de otra ciudad', 'Prioridad para estudiantes y grupos subrepresentados'],
+            personal: 'Datos personales', fullName: 'Nombre completo', cityCountry: 'Ciudad y país', occupation: 'Ocupación', choose: 'Elige una opción',
+            occOpts: ['Estudiante', 'Docente', 'Profesional', 'Buscando empleo', 'Otra'], org: 'Universidad, colegio u organización',
+            motive: 'Motivo', why: '¿Por qué aplicas a la beca y qué esperas aprender en PyCon Colombia?',
+            minChars: (min, n) => (n >= min ? `${n} caracteres ✓` : `${n} de ${min} caracteres mínimos`),
+            tooShort: (min) => `Cuéntanos un poco más (mínimo ${min} caracteres).`,
+            travel: 'Necesito apoyo de viaje y hospedaje', sendGrant: 'Enviar aplicación',
+            grantOk: (n, r) => `¡Gracias, ${n}! Recibimos tu aplicación a beca (referencia ${r}). Te daremos respuesta por correo en un máximo de 3 semanas.`,            cocAgree: 'Leí y acepto el código de conducta *', register: 'Enviar registro', volOk: (n) => `¡Gracias, ${n}! Recibimos tu registro como voluntario. Pronto te escribiremos 🌿`,
+            emailErr: 'Escribe un correo válido.', backHome: 'Volver al inicio', newReport: 'Enviar otro reporte',
             viewTalkShort: 'Ver charla', viewProfile: 'Ver perfil', talkLabel: 'Charla',
             spoTitle: 'Con el respaldo de líderes de la industria', spoBtn: 'Sé patrocinador',
             spoLead: 'PyCon Colombia es posible gracias al apoyo de organizaciones comprometidas con el ecosistema Python y la innovación tecnológica en Latinoamérica.',
@@ -92,7 +97,7 @@
             goSchedule: 'Explore the schedule', removeFrom: 'Remove',
             howTo: 'How to get to', whereAreYou: 'Where are you?', walk: (m, min) => `${m} m · ${min} min walk`, replay: 'Replay route',
             steps: 'Directions', start: 'Start at', cont: 'Continue along', arrive: 'You arrive at', you: 'You', osm: 'Open in OpenStreetMap',
-            speaker: 'Speaker', viewSpeaker: 'View speaker', viewTalk: 'View the talk', agenda: 'Talk agenda', about: 'Description',
+            speaker: 'Speaker', viewSpeaker: 'View speaker', viewTalk: 'View the talk', agenda: 'Talk agenda', about: 'Description', learn: 'What you will learn', audience: 'Who is it for?', duration: 'Duration',
             session: 'Session', backSpeakers: 'Back to speakers', backKeynotes: 'Back to keynotes', when: 'When & where',
             backSponsors: 'Back to sponsors', visit: 'Visit web site', aboutUs: 'About us', aboutSponsor: 'About this sponsor',
             videos: 'Videos', becomeSponsor: 'Become a sponsor', tierOf: 'Sponsor',
@@ -105,13 +110,19 @@
             reportOk: (r) => `We received your report (reference ${r}). The conduct team will review it within 24 hours.`, required: 'This field is required.',
             urgentNote: 'If you are in danger right now, find someone from the organizing team (orange t-shirts) or call the emergency line 123.',
             volTitle: 'Volunteer registration', volLead: 'Join the team that makes PyCon Colombia 2028 possible. We will contact you with the onboarding details.',
-            phone: 'Phone', city: 'City', areas: 'Where would you like to help? *', days: 'Which days can you join? *', shirt: 'T-shirt size', exp: 'Tell us about your experience (optional)',
-            cocAgree: 'I have read and accept the code of conduct *', register: 'Send registration', volOk: (n) => `Thank you, ${n}! We received your volunteer registration. We will write to you soon 🌿`,
-            pickOne: 'Choose at least one option.', emailErr: 'Please enter a valid email.', backHome: 'Back to home', newReport: 'Send another report',
-            areaOpts: ['Logistics', 'Registration', 'Social media', 'Design', 'Supporting speakers', 'Sprints & workshops'],
-            dayOpts: ['Friday 14', 'Saturday 15', 'Sunday 16'],
-            kTitle: 'Keynotes, <span>the voices that open and close each day</span>',
-            kLead: (n, d) => `${n} keynotes across the ${d} days of the conference. Meet each speaker and save their talk to your schedule or your calendar.`,
+            phone: 'Phone', city: 'City', shirt: 'T-shirt size', exp: 'Tell us about your experience (optional)',
+            allDays: 'Remember: as a volunteer you must be available for all 3 days of the event, Friday 14 to Sunday 16 July 2028.',
+            grantKicker: 'Financial aid', grantTitle: 'Apply for a grant', backTickets: 'Back to tickets',
+            grantLead: 'We want no one to miss PyCon Colombia for financial reasons. Tell us who you are and why you want to attend.',
+            grantCovers: ['Ticket for all 3 days, with meals and kit', 'Travel and lodging support for people coming from other cities', 'Priority for students and underrepresented groups'],
+            personal: 'Personal details', fullName: 'Full name', cityCountry: 'City and country', occupation: 'Occupation', choose: 'Choose an option',
+            occOpts: ['Student', 'Teacher', 'Professional', 'Looking for a job', 'Other'], org: 'University, school or organization',
+            motive: 'Reason', why: 'Why are you applying for a grant and what do you hope to learn at PyCon Colombia?',
+            minChars: (min, n) => (n >= min ? `${n} characters ✓` : `${n} of ${min} minimum characters`),
+            tooShort: (min) => `Tell us a bit more (at least ${min} characters).`,
+            travel: 'I need travel and lodging support', sendGrant: 'Send application',
+            grantOk: (n, r) => `Thank you, ${n}! We received your grant application (reference ${r}). We will reply by email within 3 weeks.`,            cocAgree: 'I have read and accept the code of conduct *', register: 'Send registration', volOk: (n) => `Thank you, ${n}! We received your volunteer registration. We will write to you soon 🌿`,
+            emailErr: 'Please enter a valid email.', backHome: 'Back to home', newReport: 'Send another report',
             viewTalkShort: 'View talk', viewProfile: 'View profile', talkLabel: 'Talk',
             spoTitle: 'Trusted by industry leaders', spoBtn: 'Become a sponsor',
             spoLead: 'PyCon Colombia is made possible through the generous support of organizations dedicated to advancing the Python ecosystem and fostering technological innovation in Latin America.',
@@ -151,20 +162,22 @@
         if (parts[0] === 'agenda' && parts[1] === 'evento' && D.EVENTS[parts[2]]) return { kind: 'event', id: parts[2], query };
         if (parts[0] === 'agenda') return { kind: 'schedule', query };
         if (parts[0] === 'charla' && A.PEOPLE[parts[1]]) return { kind: 'talk', id: parts[1] };
-        if (parts[0] === 'keynotes') return { kind: 'keynotes' };
         if (parts[0] === 'patrocinadores') return { kind: 'sponsors' };
         if (parts[0] === 'patrocinador' && D.SPONSORS.some((s) => s.id === parts[1])) return { kind: 'sponsor', id: parts[1] };
         if (parts[0] === 'cuenta' && A.SOCIAL_NAMES[parts[2]]) return { kind: 'account', id: parts[1], net: parts[2] };
         if (parts[0] === 'codigo-de-conducta' && parts[1] === 'reporte') return { kind: 'report' };
         if (parts[0] === 'codigo-de-conducta') return { kind: 'coc' };
         if (parts[0] === 'voluntariado') return { kind: 'volunteer' };
+        if (parts[0] === 'beca') return { kind: 'grant' };
         return { kind: 'notfound' };
     }
 
-    const RENDER = { schedule: renderSchedule, mine: renderMine, event: renderEvent, talk: renderTalk, keynotes: renderKeynotes, sponsors: renderSponsors, sponsor: renderSponsor, account: renderAccount, coc: renderCoc, report: renderReport, volunteer: renderVolunteer, notfound: renderNotFound };
-    const NAV_ROUTE = { schedule: 'agenda', mine: 'agenda', event: 'agenda', keynotes: 'keynotes', sponsors: 'patrocinadores', sponsor: 'patrocinadores', coc: 'codigo-de-conducta', report: 'codigo-de-conducta' };
+    const RENDER = { schedule: renderSchedule, mine: renderMine, event: renderEvent, talk: renderTalk, sponsors: renderSponsors, sponsor: renderSponsor, account: renderAccount, coc: renderCoc, report: renderReport, volunteer: renderVolunteer, grant: renderGrant, notfound: renderNotFound };
+    const NAV_ROUTE = { schedule: 'agenda', mine: 'agenda', event: 'agenda', sponsors: 'patrocinadores', sponsor: 'patrocinadores', coc: 'codigo-de-conducta', report: 'codigo-de-conducta' };
 
     function route() {
+        // los keynotes volvieron a la landing: los enlaces viejos a #/keynotes llevan a su sección
+        if (location.hash.startsWith('#/keynotes')) { location.replace('#keynotes'); return; }
         const r = parse();
         if (!r) return showLanding();
         const sameSchedule = current && current.kind === 'schedule' && r.kind === 'schedule' && view.querySelector('[data-schedule]');
@@ -174,8 +187,7 @@
         view.hidden = false;
         A.onScroll();
         A.clearActive();
-        const navKey = r.kind === 'talk' && r.id.startsWith('k') ? 'keynotes' : NAV_ROUTE[r.kind];
-        const navLink = $(`#main-nav [data-route="${navKey}"]`);
+        const navLink = $(`#main-nav [data-route="${NAV_ROUTE[r.kind]}"]`);
         if (navLink) { navLink.classList.add('is-active'); navLink.setAttribute('aria-current', 'page'); }
 
         if (sameSchedule) { updateSchedule(true); return; }
@@ -656,7 +668,6 @@
             if (i === path.length - 1) return `${t().arrive} <b>${esc(pick(room.name))}</b> · ${esc(pick(room.building))}`;
             return N[n].label ? `${t().cont} <b>${esc(pick(N[n].label))}</b>` : '';
         }).filter(Boolean);
-        const desc = e.long ? pick(e.long) : [pick(e.desc || '')];
         view.innerHTML = `<div class="view-wrap">
             ${crumbs([['#/agenda', t().backGeneral, 'back', true], ['#/agenda/mi', t().backMine, 'star']])}
             <section class="card card--frame event-page">
@@ -665,17 +676,14 @@
                 ${e.format !== 'break' ? `<ul class="tags">${evTags(e).map((x, i) => `<li class="tag ${i === 0 ? 'tag--fill' : ''}">${esc(x)}</li>`).join('')}</ul>` : ''}
                 <div class="event-page__grid">
                     <div>
-                        ${desc.filter(Boolean).map((x) => `<p>${esc(x)}</p>`).join('')}
-                        ${e.agenda ? `<h2 class="sub-h">${t().agenda}</h2><ol class="agenda-list">${pick(e.agenda).map((x) => `<li>${esc(x)}</li>`).join('')}</ol>` : ''}
+                        ${talkBody(e)}
                         ${p ? `<div class="mini-speaker inset">${A.avatarHTML(p, 'avatar--md')}
                             <div class="mini-speaker__body"><h3>${esc(pick(p.name))}</h3><p class="muted">${esc(pick(p.role))}</p></div>
                             <div class="btn-row"><button class="btn btn--outline btn--sm" type="button" data-open-speaker="${p.id}">${t().viewSpeaker}</button>
                             <a class="btn btn--primary btn--sm" href="#/charla/${p.id}">${t().viewTalk}</a></div></div>` : ''}
                     </div>
                     <aside class="inset event-page__when">
-                        <h2 class="sub-h">${t().when}</h2>
-                        <p>${icon('cal')}<span>${esc(pick(day.label))} ${day.num} · ${e.t} – ${e.end}</span></p>
-                        <p>${icon('pin')}<span>${esc(pick(room.name))} · ${esc(pick(room.building))}</span></p>
+                        ${talkFacts(e)}
                         ${e.format !== 'break' ? starBtn(e, true) + calBtn(e) + calNote() : ''}
                     </aside>
                 </div>
@@ -724,10 +732,33 @@
     /* ---------------------------------------------------------------- */
     /*  Charla de un ponente (vista "talk" del Figma)                     */
     /* ---------------------------------------------------------------- */
+    // Cuerpo completo de una charla: descripción, lo que aprenderás, estructura y público
+    const minutes = (e) => { const [h1, m1] = e.t.split(':').map(Number), [h2, m2] = e.end.split(':').map(Number); return h2 * 60 + m2 - h1 * 60 - m1; };
+    function talkBody(e) {
+        const desc = e.long ? pick(e.long) : [pick(e.desc || '')];
+        return `${desc.filter(Boolean).map((x) => `<p>${esc(x)}</p>`).join('')}
+            ${e.learn ? `<h2 class="sub-h">${t().learn}</h2><ul class="checks talk__learn">${pick(e.learn).map((x) => `<li>${esc(x)}</li>`).join('')}</ul>` : ''}
+            ${e.agenda ? `<h2 class="sub-h">${t().agenda}</h2><ol class="agenda-list">${pick(e.agenda).map((x) => `<li>${esc(x)}</li>`).join('')}</ol>` : ''}
+            ${e.audience ? `<h2 class="sub-h">${t().audience}</h2><p>${esc(pick(e.audience))}</p>` : ''}`;
+    }
+    // Ficha lateral: cuándo, dónde, duración, formato, nivel e idioma
+    function talkFacts(e) {
+        const day = D.DAYS[e.day], room = D.ROOMS[e.room] || D.ROOMS.plaza;
+        return `<h2 class="sub-h">${t().when}</h2>
+            <p>${icon('cal')}<span>${esc(pick(day.label))} ${day.num} · ${e.t} – ${e.end}</span></p>
+            <p>${icon('clock')}<span>${t().duration}: ${minutes(e)} min</span></p>
+            <p>${icon('pin')}<span>${esc(pick(room.name))} · ${esc(pick(room.building))}</span></p>
+            ${e.format !== 'break' ? `<dl class="facts">
+                <div><dt>${t().format}</dt><dd>${esc(label(D.FORMATS, e.format))}</dd></div>
+                <div><dt>${t().level}</dt><dd>${esc(label(D.LEVELS, e.level))}</dd></div>
+                <div><dt>${t().language}</dt><dd>${esc(label(D.LANGS, e.lang))}</dd></div>
+                <div><dt>Track</dt><dd>${esc(label(D.TRACKS, e.track))}</dd></div>
+            </dl>` : ''}`;
+    }
+
     function renderTalk(r) {
-        const p = A.PEOPLE[r.id], e = D.EVENTS[p.talk], day = D.DAYS[e.day], isKey = r.id.startsWith('k');
-        const back = isKey ? ['#/keynotes', t().backKeynotes] : ['#ponentes', t().backSpeakers];
-        const desc = e.long ? pick(e.long) : [pick(e.desc)];
+        const p = A.PEOPLE[r.id], e = D.EVENTS[p.talk], isKey = r.id.startsWith('k');
+        const back = isKey ? ['#keynotes', t().backKeynotes] : ['#ponentes', t().backSpeakers];
         view.innerHTML = `<div class="view-wrap">
             ${crumbs([[back[0], back[1], 'back', true]])}
             <article class="card card--frame talk">
@@ -740,13 +771,9 @@
                     <li class="tag tag--lg">${t().language}: ${esc(label(D.LANGS, e.lang))}</li>
                 </ul>
                 <div class="event-page__grid">
-                    <div class="talk__desc">
-                        ${desc.map((x) => `<p>${esc(x)}</p>`).join('')}
-                        ${e.agenda ? `<h2 class="sub-h">${t().agenda}</h2><ol class="agenda-list">${pick(e.agenda).map((x) => `<li>${esc(x)}</li>`).join('')}</ol>` : ''}
-                    </div>
+                    <div class="talk__desc">${talkBody(e)}</div>
                     <aside class="inset event-page__when">
-                        <h2 class="sub-h">${t().when}</h2>
-                        <p>${icon('cal')}<span>${esc(pick(day.label))} ${day.num} · ${e.t} – ${e.end}</span></p>
+                        ${talkFacts(e)}
                         ${roomBtn(e)}
                         ${starBtn(e, true)}
                         ${calBtn(e)}
@@ -760,7 +787,7 @@
                     <div class="speaker-strip__body">
                         <h2>${esc(pick(p.name))}</h2>
                         <p class="muted">${esc(pick(p.role))}</p>
-                        <p>${esc(pick(p.bio).slice(0, 180))}${pick(p.bio).length > 180 ? '…' : ''}</p>
+                        <p>${esc(pick(p.bio))}</p>
                         <ul class="social">${A.socialHTML(p)}</ul>
                     </div>
                     <button class="btn btn--primary" type="button" data-open-speaker="${p.id}">${t().viewSpeaker}</button>
@@ -775,47 +802,6 @@
     /* ---------------------------------------------------------------- */
     /*  Patrocinador (vista "sponsor" del Figma)                          */
     /* ---------------------------------------------------------------- */
-    /* ---------------------------------------------------------------- */
-    /*  Keynotes (página propia, con más detalle que la tarjeta)          */
-    /* ---------------------------------------------------------------- */
-    function renderKeynotes() {
-        // en el orden en que suceden en la agenda
-        const list = [...D.KEYNOTES].sort((a, b) => { const ea = D.EVENTS[a.talk], eb = D.EVENTS[b.talk]; return ea.day - eb.day || ea.t.localeCompare(eb.t); });
-        view.innerHTML = `<div class="view-wrap">
-            ${crumbs([['#inicio', t().home]])}
-            <header class="card card--frame section-head">
-                <p class="eyebrow">Keynotes</p>
-                <h1 class="title title--xl">${t().kTitle}</h1>
-                <p>${esc(t().kLead(list.length, D.DAYS.length))}</p>
-            </header>
-            <ul class="keynote-list">${list.map((p) => {
-                const e = D.EVENTS[p.talk], day = D.DAYS[e.day], room = D.ROOMS[e.room];
-                return `<li class="card keynote-card${p.tba ? ' keynote-card--tba' : ''}">
-                    <div class="keynote-card__photo">${A.avatarHTML(p)}</div>
-                    <div class="keynote-card__body">
-                        <p class="eyebrow">${esc(pick(day.label))} ${day.num} · ${e.t} – ${e.end}</p>
-                        <h2 class="keynote-card__name">${esc(pick(p.name))}</h2>
-                        <p class="muted keynote-card__role">${esc(pick(p.role))}</p>
-                        <p>${esc(pick(p.bio))}</p>
-                        <div class="inset keynote-card__talk">
-                            <p class="inset__label">${t().talkLabel}</p>
-                            <h3><a href="#/charla/${p.id}">${esc(pick(e.title))}</a></h3>
-                            <p class="muted">${icon('pin')} ${esc(pick(room.name))} · ${esc(pick(room.building))}</p>
-                            <ul class="tags">${evTags(e).map((x) => `<li class="tag">${esc(x)}</li>`).join('')}</ul>
-                        </div>
-                        <div class="keynote-card__actions">
-                            <div class="btn-row">
-                                <a class="btn btn--primary" href="#/charla/${p.id}">${t().viewTalkShort}</a>
-                                <button class="btn btn--outline" type="button" data-open-speaker="${p.id}">${t().viewProfile}</button>
-                            </div>
-                            <ul class="social">${A.socialHTML(p)}</ul>
-                        </div>
-                    </div>
-                </li>`;
-            }).join('')}</ul>
-        </div>`;
-    }
-
     /* ---------------------------------------------------------------- */
     /*  Patrocinadores (página propia, mismo contenido que tenía la landing) */
     /* ---------------------------------------------------------------- */
@@ -846,7 +832,7 @@
         const p = A.PEOPLE[r.id], net = A.SOCIAL_NAMES[r.net];
         const isKey = p && r.id.startsWith('k');
         view.innerHTML = `<div class="view-wrap view-wrap--narrow">
-            ${crumbs([[isKey ? '#/keynotes' : '#ponentes', t().goBack, 'back', true]])}
+            ${crumbs([[isKey ? '#keynotes' : '#ponentes', t().goBack, 'back', true]])}
             <section class="card card--frame account">
                 <div class="account__head">
                     ${p ? `<div class="account__photo">${A.avatarHTML(p)}</div>` : ''}
@@ -856,8 +842,8 @@
                 <h1 class="title">${t().accTitle}</h1>
                 <p class="account__lead">${esc(p ? t().accP(net, pick(p.name)) : t().accPycon(net))}</p>
                 <div class="btn-row btn-row--center">
-                    <a class="btn btn--primary" href="${isKey ? '#/keynotes' : '#ponentes'}" data-back>${icon('back')}<span>${t().goBack}</span></a>
-                    <a class="btn btn--outline" href="${isKey ? '#/keynotes' : '#ponentes'}">${isKey ? t().seeKeynotes : t().seeSpeakers}</a>
+                    <a class="btn btn--primary" href="${isKey ? '#keynotes' : '#ponentes'}" data-back>${icon('back')}<span>${t().goBack}</span></a>
+                    <a class="btn btn--outline" href="${isKey ? '#keynotes' : '#ponentes'}">${isKey ? t().seeKeynotes : t().seeSpeakers}</a>
                 </div>
             </section>
         </div>`;
@@ -907,8 +893,8 @@
             <article class="card card--frame doc">
                 <p class="eyebrow">PyCon Colombia 2028</p>
                 <h1 class="title title--xl">${t().cocTitle}</h1>
-                <div lang="en">
-                ${D.COC.map(([h, paras, bullets, after], i) => `<section><h2><span>${String(i + 1).padStart(2, '0')}</span>${esc(h)}</h2>
+                <div>
+                ${D.COC[A.lang].map(([h, paras, bullets, after], i) => `<section><h2><span>${String(i + 1).padStart(2, '0')}</span>${esc(h)}</h2>
                     ${paras.map((x) => `<p>${esc(x)}</p>`).join('')}
                     ${bullets ? `<ul class="doc__list">${bullets.map((x) => `<li>${esc(x)}</li>`).join('')}</ul>` : ''}
                     ${(after || []).map((x) => `<p>${esc(x)}</p>`).join('')}</section>`).join('')}
@@ -925,9 +911,6 @@
     const field = (id, lab, type = 'text', extra = '') => `<div class="field"><label for="${id}">${esc(lab)}</label>
         ${type === 'textarea' ? `<textarea id="${id}" name="${id}" rows="5" ${extra}></textarea>` : `<input id="${id}" name="${id}" type="${type}" ${extra}>`}
         <p class="field__err" id="${id}-err" hidden></p></div>`;
-    const checks = (name, legend, opts) => `<fieldset class="field field--checks" id="${name}"><legend>${esc(legend)}</legend>
-        <div>${opts.map((o, i) => `<label class="check"><input type="checkbox" name="${name}" value="${i}"><span>${esc(o)}</span></label>`).join('')}</div>
-        <p class="field__err" id="${name}-err" hidden></p></fieldset>`;
     function setErr(form, id, msg) {
         const err = $(`#${id}-err`, form), el = $(`#${id}`, form);
         err.textContent = msg || ''; err.hidden = !msg;
@@ -1001,8 +984,7 @@
                         ${field('v-phone', t().phone, 'tel', 'autocomplete="tel"')}
                         ${field('v-city', t().city, 'text', 'value="Medellín"')}
                     </div>
-                    ${checks('v-areas', t().areas, t().areaOpts)}
-                    ${checks('v-days', t().days, t().dayOpts)}
+                    <p class="notice notice--days">${icon('cal')}<span>${t().allDays}</span></p>
                     <div class="field"><label for="v-shirt">${t().shirt}</label>
                         <select id="v-shirt" name="v-shirt">${['XS', 'S', 'M', 'L', 'XL', 'XXL'].map((s) => `<option${s === 'M' ? ' selected' : ''}>${s}</option>`).join('')}</select></div>
                     ${field('v-exp', t().exp, 'textarea')}
@@ -1022,14 +1004,80 @@
             const name = $('#v-name', form), email = $('#v-email', form);
             let ok = setErr(form, 'v-name', name.value.trim() ? '' : t().required);
             ok = setErr(form, 'v-email', !email.value.trim() ? t().required : email.checkValidity() ? '' : t().emailErr) && ok;
-            ok = setErr(form, 'v-areas', $$('[name="v-areas"]:checked', form).length ? '' : t().pickOne) && ok;
-            ok = setErr(form, 'v-days', $$('[name="v-days"]:checked', form).length ? '' : t().pickOne) && ok;
             ok = setErr(form, 'v-coc', $('#v-coc', form).checked ? '' : t().required) && ok;
             if (!ok) { (form.querySelector('[aria-invalid="true"] input, [aria-invalid="true"]'))?.focus(); return; }
             form.hidden = true;
             const box = $('[data-ok]', view);
             box.hidden = false;
             box.innerHTML = `<p>${esc(t().volOk(name.value.trim().split(' ')[0]))}</p><div class="btn-row"><a class="btn btn--primary" href="#inicio">${t().backHome}</a><a class="btn btn--outline" href="#/agenda">${t().goSchedule}</a></div>`;
+            box.tabIndex = -1; box.focus();
+        });
+    }
+
+    /* ---------------------------------------------------------------- */
+    /*  Aplicación a beca (desde la tarjeta "Becas" junto a la boleta)    */
+    /* ---------------------------------------------------------------- */
+    const MOTIVE_MIN = 80;   // caracteres mínimos para el motivo
+    function renderGrant() {
+        view.innerHTML = `<div class="view-wrap view-wrap--narrow">
+            ${crumbs([['#boletas', t().backTickets, 'back', true]])}
+            <section class="card card--frame">
+                <p class="eyebrow">${t().grantKicker}</p>
+                <h1 class="title">${t().grantTitle}</h1>
+                <p class="muted">${t().grantLead}</p>
+                <ul class="checks grant__covers">${t().grantCovers.map((x) => `<li>${esc(x)}</li>`).join('')}</ul>
+                <form class="form" novalidate data-grant>
+                    <h2 class="sub-h">${t().personal}</h2>
+                    <div class="form__row">
+                        ${field('g-name', t().fullName + ' *', 'text', 'required autocomplete="name"')}
+                        ${field('g-email', t().email + ' *', 'email', 'required autocomplete="email"')}
+                    </div>
+                    <div class="form__row">
+                        ${field('g-phone', t().phone, 'tel', 'autocomplete="tel"')}
+                        ${field('g-city', t().cityCountry + ' *', 'text', 'required autocomplete="address-level2"')}
+                    </div>
+                    <div class="form__row">
+                        <div class="field"><label for="g-occ">${t().occupation} *</label>
+                            <select id="g-occ" name="g-occ" required><option value="">${t().choose}</option>${t().occOpts.map((o) => `<option>${esc(o)}</option>`).join('')}</select>
+                            <p class="field__err" id="g-occ-err" hidden></p></div>
+                        ${field('g-org', t().org)}
+                    </div>
+                    <h2 class="sub-h">${t().motive}</h2>
+                    <div class="field">
+                        <label for="g-why">${t().why} *</label>
+                        <textarea id="g-why" name="g-why" rows="6" required aria-describedby="g-why-count"></textarea>
+                        <p class="field__hint" id="g-why-count">${t().minChars(MOTIVE_MIN, 0)}</p>
+                        <p class="field__err" id="g-why-err" hidden></p>
+                    </div>
+                    <label class="check check--box"><input type="checkbox" id="g-travel"><span>${t().travel}</span></label>
+                    <label class="check check--box"><input type="checkbox" id="g-coc"><span>${t().cocAgree.replace(/código de conducta|code of conduct/i, (m) => `<a href="#/codigo-de-conducta" target="_blank">${m}</a>`)}</span></label>
+                    <p class="field__err" id="g-coc-err" hidden></p>
+                    <div class="btn-row">
+                        <button class="btn btn--primary" type="submit">${t().sendGrant}</button>
+                        <a class="btn btn--outline" href="#boletas">${t().backTickets}</a>
+                    </div>
+                </form>
+                <div class="inset form-ok" data-ok hidden role="status"></div>
+            </section>
+        </div>`;
+        const form = $('[data-grant]', view), why = $('#g-why', form), count = $('#g-why-count', form);
+        why.addEventListener('input', () => { count.textContent = t().minChars(MOTIVE_MIN, why.value.trim().length); });
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const name = $('#g-name', form), email = $('#g-email', form);
+            let ok = setErr(form, 'g-name', name.value.trim() ? '' : t().required);
+            ok = setErr(form, 'g-email', !email.value.trim() ? t().required : email.checkValidity() ? '' : t().emailErr) && ok;
+            ok = setErr(form, 'g-city', $('#g-city', form).value.trim() ? '' : t().required) && ok;
+            ok = setErr(form, 'g-occ', $('#g-occ', form).value ? '' : t().required) && ok;
+            const len = why.value.trim().length;
+            ok = setErr(form, 'g-why', !len ? t().required : len < MOTIVE_MIN ? t().tooShort(MOTIVE_MIN) : '') && ok;
+            ok = setErr(form, 'g-coc', $('#g-coc', form).checked ? '' : t().required) && ok;
+            if (!ok) { form.querySelector('[aria-invalid="true"]')?.focus(); return; }
+            const ref = 'BEC-' + Math.random().toString(36).slice(2, 7).toUpperCase();
+            form.hidden = true;
+            const box = $('[data-ok]', view);
+            box.hidden = false;
+            box.innerHTML = `<p>${esc(t().grantOk(name.value.trim().split(' ')[0], ref))}</p><div class="btn-row"><a class="btn btn--primary" href="#inicio">${t().backHome}</a><a class="btn btn--outline" href="#/agenda">${t().goSchedule}</a></div>`;
             box.tabIndex = -1; box.focus();
         });
     }

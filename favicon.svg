@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- Favicon: el mismo símbolo de Python del logo (#py-mark en index.html) -->
+  <path d="M31.5 3C22 3 17 6.4 17 12.5V20h15v3H10.5C4.6 23 1 27.6 1 36.5S4.6 50 10.5 50H16v-8.3C16 35.8 20.6 31 26.5 31h13c4.9 0 8.5-3.8 8.5-8.6V12.5C48 6.6 42 3 31.5 3Z" fill="#47868B"/>
+  <path d="M31.5 3C22 3 17 6.4 17 12.5V20h15v3H10.5C4.6 23 1 27.6 1 36.5S4.6 50 10.5 50H16v-8.3C16 35.8 20.6 31 26.5 31h13c4.9 0 8.5-3.8 8.5-8.6V12.5C48 6.6 42 3 31.5 3Z" fill="#F59216" transform="rotate(180 32 32)"/>
+  <circle cx="24" cy="11.5" r="2.8" fill="#FFFDF7"/>
+  <circle cx="40" cy="52.5" r="2.8" fill="#FFFDF7"/>
+</svg>

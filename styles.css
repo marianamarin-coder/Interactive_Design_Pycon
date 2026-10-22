@@ -273,6 +273,26 @@ button { font: inherit; color: inherit; }
 .main-nav a.is-active { background: rgba(229, 255, 254, .85); box-shadow: inset 0 0 0 1.5px var(--teal); }
 .main-nav__cta { margin-left: 8px; }
 
+/* Desplegable "Agenda" (Keynotes · Ponentes · Ver la agenda) */
+.nav-group { position: relative; }
+.nav-group__toggle {
+    display: inline-flex; align-items: center; gap: 4px; padding: 8px 10px 8px 12px; border: 0; border-radius: var(--radius-pill);
+    background: none; cursor: pointer; font-size: .92rem; font-weight: 500; color: var(--ink); transition: background-color .2s;
+}
+.nav-group__toggle svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; transition: transform .25s; }
+.nav-group__toggle:hover, .nav-group.is-open .nav-group__toggle { background: rgba(255, 255, 255, .55); }
+.nav-group.is-open .nav-group__toggle svg { transform: rotate(180deg); }
+/* en la pantalla de agenda el botón del grupo también queda marcado */
+.nav-group:has(a.is-active) .nav-group__toggle { background: rgba(229, 255, 254, .85); box-shadow: inset 0 0 0 1.5px var(--teal); }
+.nav-group__menu {
+    position: absolute; top: calc(100% + 10px); left: 0; min-width: 210px; z-index: 5;
+    display: grid; gap: 2px; padding: 8px; border-radius: 18px;
+    background: var(--cream); border: 1.5px solid var(--orange); box-shadow: 0 20px 40px -16px rgba(16, 41, 43, .55);
+    opacity: 0; transform: translateY(-6px); visibility: hidden; transition: opacity .2s, transform .2s, visibility 0s .2s;
+}
+.nav-group.is-open .nav-group__menu { opacity: 1; transform: none; visibility: visible; transition: opacity .2s, transform .2s; }
+.nav-group__menu a:not(.btn) { padding: 10px 14px; border-radius: 12px; }
+
 .lang-toggle {
     position: absolute; top: calc((var(--header-h) - 44px) / 2);
     right: calc(var(--gutter) + max(0px, (100vw - var(--gutter) * 2 - var(--max)) / 2) + 10px);
@@ -414,9 +434,52 @@ main { position: relative; z-index: 1; }
 .speaker__photo { aspect-ratio: 690 / 641; margin-bottom: 14px; }
 .speaker h3 { font-size: 1.12rem; font-weight: 500; line-height: 1.25; margin-bottom: .3em; }
 .speaker__role { font-size: .88rem; color: var(--muted); font-weight: 500; line-height: 1.4; margin: 0; }
-.speaker__bio { font-size: .88rem; color: var(--muted); line-height: 1.55; flex: 1; }
+/* bio completa, recortada a 4 líneas para que todas las tarjetas midan igual (el perfil la muestra entera) */
+.speaker__bio {
+    font-size: .88rem; color: var(--muted); line-height: 1.55; margin-bottom: 14px;
+    display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden;
+}
+/* la charla de la persona, para que la tarjeta no se vea vacía */
+.speaker__talk { flex: 1; text-align: left; background: var(--inset-fill); border-radius: var(--radius-inner); padding: 12px 14px; margin-bottom: 16px; }
+.speaker__talk p { margin: 0; }
+.speaker__talk-label { font-size: .7rem; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--teal-ink); }
+.speaker__talk-title { font-weight: 600; font-size: .95rem; line-height: 1.35; margin: 4px 0 !important; }
+.speaker__talk-meta { font-size: .8rem; color: var(--muted); }
 .speaker__open { position: absolute; inset: 0; z-index: 1; border: 0; background: none; cursor: pointer; border-radius: var(--radius-card); }
 .speaker .social { justify-content: center; position: relative; z-index: 2; gap: 6px; flex-wrap: wrap; }
+.speaker__cta { position: relative; z-index: 2; align-self: center; margin-top: 16px; }
+
+/* Keynotes: las 5 en una fila en pantallas anchas */
+.speakers--keynotes { grid-template-columns: repeat(auto-fit, minmax(205px, 1fr)); }
+.speakers--keynotes .social { gap: 4px; flex-wrap: nowrap; }
+.speakers--keynotes .social a { width: 32px; height: 32px; }
+.speakers--keynotes .social svg { width: 16px; height: 16px; }
+
+/* Ponentes: una sola fila que se desliza con scroll-snap */
+.carousel { position: relative; }
+.speakers--row {
+    display: flex; gap: clamp(16px, 2vw, 24px); overflow-x: auto; overscroll-behavior-x: contain;
+    scroll-snap-type: x mandatory; scroll-padding: 0 4px; padding: 10px 4px 22px; margin: -10px -4px 0;
+    scrollbar-width: thin; scrollbar-color: var(--teal) transparent;
+}
+/* padding fijo: en un flex el % se calcularía sobre el ancho de toda la fila */
+.speakers--row > .speaker { flex: 0 0 clamp(250px, 26vw, 290px); scroll-snap-align: start; padding: 20px 18px 18px; }
+.speakers--row:focus-visible { outline-offset: 6px; }
+.carousel__btn {
+    position: absolute; top: 42%; z-index: 3; width: 48px; height: 48px; border-radius: 50%;
+    display: grid; place-items: center; cursor: pointer; border: 1.5px solid var(--orange);
+    background: var(--cream); color: var(--ink); box-shadow: 0 10px 24px -10px rgba(16, 41, 43, .6);
+    transition: opacity .2s, transform .2s;
+}
+.carousel__btn svg { width: 22px; height: 22px; }
+.carousel__btn--prev { left: -20px; }
+.carousel__btn--next { right: -20px; }
+.carousel__btn:hover:not(:disabled) { transform: scale(1.06); }
+.carousel__btn:disabled { opacity: 0; pointer-events: none; }
+@media (max-width: 720px) {
+    .carousel__btn { display: none; }   /* en el móvil se desliza con el dedo */
+    .speakers--row > .speaker { flex-basis: 78vw; }
+}
 .speaker .social a { width: 36px; height: 36px; }
 .speaker--tba .avatar span { font-size: 4rem; }
 
@@ -534,17 +597,31 @@ main { position: relative; z-index: 1; }
 .events__empty { margin: 12px 0 0; text-align: center; color: var(--muted); }
 
 /* ---------- Boletas ---------- */
-.tickets { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(4, 1fr); gap: clamp(14px, 1.6vw, 22px); align-items: stretch; }
-.ticket { display: flex; flex-direction: column; padding: 28px 24px; }
-.ticket h3 { font-size: 1.3rem; font-weight: 600; margin-bottom: .4em; }
-.ticket__price { font-size: clamp(1.7rem, 2.6vw, 2.1rem); font-weight: 700; letter-spacing: -.02em; color: var(--teal-ink); }
-.ticket__price small { font-size: .5em; font-weight: 600; color: var(--muted); }
-.ticket .checks { flex: 1; font-size: .93rem; }
-.ticket--featured { background: linear-gradient(rgba(229, 255, 254, .9), var(--card-fill) 55%); border-width: 2.5px; transform: translateY(-10px); }
-.ticket__badge {
-    position: absolute; top: -14px; left: 24px; padding: 4px 14px; border-radius: var(--radius-pill);
-    background: var(--orange); color: var(--ink); font-size: .78rem; font-weight: 700;
+/* Una sola boleta: precio | qué incluye | botón de compra */
+/* precio | qué incluye; el botón de compra va siempre abajo a la izquierda */
+.ticket--single {
+    display: grid; grid-template-columns: minmax(200px, 1fr) 1.3fr; gap: clamp(20px, 3vw, 40px); align-items: center;
+    background: linear-gradient(110deg, rgba(229, 255, 254, .9), var(--card-fill) 45%); border-width: 2.5px;
 }
+.ticket h3 { font-size: 1.3rem; font-weight: 600; margin-bottom: .3em; }
+.ticket__price { font-size: clamp(2.2rem, 4vw, 3rem); font-weight: 700; letter-spacing: -.02em; color: var(--teal-ink); margin-bottom: .3em; line-height: 1.1; }
+.ticket__price small { font-size: .45em; font-weight: 600; color: var(--muted); }
+.ticket__main .muted { margin: 0; font-size: .92rem; }
+.ticket .checks { margin: 0; font-size: .97rem; }
+/* Boleta general (ancha) + becas (angosta, a la derecha) */
+.tickets-row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(240px, 300px); gap: clamp(14px, 1.8vw, 24px); align-items: stretch; }
+.ticket--grant { display: flex; flex-direction: column; padding: clamp(22px, 2.6vw, 32px); }
+.ticket--grant .eyebrow { margin-bottom: .6em; }
+.ticket--grant h3 { font-size: 1.15rem; }
+.ticket--grant .muted { flex: 1; font-size: .92rem; margin-bottom: 18px; }
+.ticket--grant .btn { align-self: flex-start; }
+.ticket--single > .btn { grid-column: 1 / -1; justify-self: start; }
+@media (max-width: 860px) {
+    .tickets-row { grid-template-columns: 1fr; }
+    .ticket--single { grid-template-columns: 1fr; align-items: start; }
+}
+.field__hint { margin: 0; font-size: .82rem; color: var(--muted); }
+.grant__covers { margin: 4px 0 8px; }
 
 /* ---------- Patrocinadores (vista "Trusted by" del Figma) ---------- */
 .sponsors { text-align: center; }
@@ -589,7 +666,10 @@ main { position: relative; z-index: 1; }
 .duo { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(16px, 2vw, 28px); }
 .duo .card { display: flex; flex-direction: column; }
 .duo .card p { flex: 1; }
-.btn-row { display: flex; gap: 12px; flex-wrap: wrap; }
+.btn-row { display: flex; gap: 14px; flex-wrap: wrap; }
+/* Aire mínimo entre un botón y lo que tiene encima (etiquetas, textos, listas) en todo el sitio */
+.tags + :is(.btn, .btn-row) { margin-top: 18px; }
+.tags + .room-btn { margin-top: 14px; }
 
 /* ---------- FAQ ---------- */
 .faq { display: grid; gap: 10px; }
@@ -609,7 +689,7 @@ main { position: relative; z-index: 1; }
 
 /* ---------- Newsletter ---------- */
 .newsletter { text-align: center; }
-.newsletter__row { display: flex; gap: 10px; max-width: 520px; margin: 0 auto; }
+.newsletter__row { display: flex; gap: 16px; max-width: 520px; margin: 0 auto; }
 .newsletter input {
     flex: 1; min-width: 0; padding: 0 22px; min-height: 52px; font: inherit; color: var(--ink);
     background: var(--aqua); border: 1.5px solid var(--teal); border-radius: var(--radius-pill);
@@ -654,7 +734,9 @@ main { position: relative; z-index: 1; }
 .speaker-modal .social { margin: 14px 0 6px; }
 .speaker-modal__h { font-size: 1.15rem; font-weight: 600; margin: 1.2em 0 .5em; }
 .speaker-modal__talk { font-weight: 600; font-size: 1.1rem; }
-.speaker-modal__session .tags { margin: 0; }
+.speaker-modal__session { display: flex; flex-direction: column; align-items: flex-start; gap: 18px; }
+.speaker-modal__session > *, .speaker-modal__session .tags { margin: 0; }
+.speaker-modal__session > .btn { margin-top: 4px; }   /* 18px de gap + 4px = aire claro entre etiquetas y botón */
 .speaker-modal__close {
     position: absolute; top: 14px; right: 14px; z-index: 2; width: 44px; height: 44px; border-radius: 50%;
     border: 1.5px solid var(--teal); background: var(--cream); cursor: pointer; display: grid; place-items: center;
@@ -665,11 +747,6 @@ main { position: relative; z-index: 1; }
 /* =========================================================================
    RESPONSIVE
    ========================================================================= */
-@media (max-width: 1080px) {
-    .tickets { grid-template-columns: repeat(2, 1fr); }
-    .ticket--featured { transform: none; }
-}
-
 @media (max-width: 1120px) {
     .nav-toggle { display: flex; }
     .site-header__bar { padding-right: 104px; }
@@ -690,7 +767,13 @@ main { position: relative; z-index: 1; }
     .is-open .site-header__bar.glass { --glass-fill: var(--cream); }
     .main-nav a:not(.btn) { padding: 12px 16px; font-size: 1rem; }
     .main-nav__cta { margin: 6px 0 0; }
-
+    /* el desplegable se abre dentro de la lista, con sangría */
+    .nav-group__toggle { width: 100%; justify-content: space-between; padding: 12px 16px; font-size: 1rem; }
+    .nav-group__menu {
+        position: static; min-width: 0; padding: 0 0 0 14px; margin: 2px 0 2px 16px; border: 0; border-left: 2px solid var(--orange);
+        border-radius: 0; box-shadow: none; background: none; display: none; transform: none;
+    }
+    .nav-group.is-open .nav-group__menu { display: grid; }
 }
 
 @media (max-width: 960px) {
@@ -716,7 +799,6 @@ main { position: relative; z-index: 1; }
 
     .stats { grid-template-columns: repeat(2, 1fr); }
     .countdown { gap: 6px; }
-    .tickets { grid-template-columns: 1fr; }
     .logos, .logos--platinum, .logos--silverplus { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     .logos--venue { grid-template-columns: 1fr; }
     .event { grid-template-columns: 1fr auto; gap: 6px 12px; }
@@ -826,13 +908,13 @@ main { position: relative; z-index: 1; }
 .pager__num[aria-current="page"] { background: var(--teal-btn); border-color: var(--teal-btn); color: #fff; }
 .pager__num:hover:not([aria-current]) { background: var(--aqua); }
 
-.empty-state { display: grid; justify-items: center; gap: 10px; text-align: center; padding: 36px 20px; }
+.empty-state { display: grid; justify-items: center; gap: 18px; text-align: center; padding: 36px 20px; }
 .empty-state p { max-width: 42ch; margin: 0; color: var(--muted); }
 
 /* ---------- Página de evento + mapa ---------- */
 .event-page__grid { display: grid; grid-template-columns: 1fr minmax(240px, 320px); gap: clamp(20px, 3vw, 40px); align-items: start; }
 .event-page__grid > div > p { font-size: 1.04rem; }
-.event-page__when { display: grid; gap: 10px; }
+.event-page__when { display: grid; gap: 16px; }
 .event-page__when .sub-h { margin: 0 0 4px; }
 .event-page__when p { display: flex; gap: 10px; align-items: flex-start; margin: 0; font-weight: 500; }
 .event-page__when p .ico { width: 20px; height: 20px; margin-top: 3px; color: var(--teal-ink); }
@@ -929,22 +1011,12 @@ main { position: relative; z-index: 1; }
 .doc__list { margin: 0 0 .8em; padding-left: 1.3em; display: grid; gap: .45em; max-width: 72ch; }
 .doc__list li::marker { color: var(--orange); }
 
-/* ---------- Página de keynotes ---------- */
-.keynote-list { list-style: none; margin: 0; padding: 0; display: grid; gap: clamp(16px, 2.4vw, 28px); }
-.keynote-card { display: grid; grid-template-columns: minmax(200px, 300px) 1fr; gap: clamp(20px, 3vw, 40px); align-items: start; }
-.keynote-card__photo { aspect-ratio: 4 / 5; }
-.keynote-card__photo .avatar { border-radius: var(--radius-inner); }
-.keynote-card__name { font-size: clamp(1.6rem, 3vw, 2.3rem); font-weight: 600; letter-spacing: -.02em; margin-bottom: .2em; }
-.keynote-card__role { margin-bottom: .8em; }
-.keynote-card__talk { margin: 4px 0 18px; }
-.keynote-card__talk h3 { font-size: 1.15rem; font-weight: 600; line-height: 1.35; margin-bottom: .4em; }
-.keynote-card__talk h3 a { text-decoration: none; }
-.keynote-card__talk h3 a:hover { text-decoration: underline; text-decoration-color: var(--orange); text-underline-offset: 3px; }
-.keynote-card__talk .muted { display: flex; align-items: center; gap: 6px; font-size: .9rem; margin-bottom: .6em; }
-.keynote-card__talk .tags { margin: 0; gap: 6px; }
-.keynote-card__talk .tag { font-size: .78rem; padding: .3em .9em; }
-.keynote-card__actions { display: flex; justify-content: space-between; align-items: center; gap: 14px; flex-wrap: wrap; }
-
+/* ---------- Ficha completa de una charla ---------- */
+.talk__learn { margin-bottom: 1.2em; }
+.facts { margin: 4px 0 0; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.facts div { background: var(--card-fill); border-radius: 12px; padding: 10px 12px; }
+.facts dt { font-size: .72rem; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--teal-ink); }
+.facts dd { margin: 2px 0 0; font-weight: 600; font-size: .95rem; }
 /* ---------- Red social no habilitada ---------- */
 .account { text-align: center; display: grid; justify-items: center; }
 .account__head { position: relative; margin-bottom: 18px; }
@@ -957,10 +1029,6 @@ main { position: relative; z-index: 1; }
 .account__net .ico { width: 22px; height: 22px; }
 .account__lead { max-width: 52ch; margin: 0 auto 1.4em; font-size: 1.05rem; }
 
-@media (max-width: 760px) {
-    .keynote-card { grid-template-columns: 1fr; }
-    .keynote-card__photo { max-width: 260px; }
-}
 .doc__cta { margin-top: 18px; border: 1.5px solid var(--orange); text-align: center; display: grid; justify-items: center; }
 .doc__cta h2 { font-size: 1.25rem; font-weight: 600; margin-bottom: .4em; }
 
@@ -985,6 +1053,8 @@ main { position: relative; z-index: 1; }
 .check--box { font-weight: 500; }
 .check a { color: var(--teal-ink); }
 .notice { margin: 0; padding: 12px 16px; border-radius: var(--radius-inner); background: rgba(245, 146, 22, .14); border-left: 4px solid var(--orange); font-weight: 500; }
+.notice--days { display: flex; gap: 12px; align-items: flex-start; }
+.notice--days .ico { width: 22px; height: 22px; flex: none; margin-top: 2px; color: var(--teal-ink); }
 .form-ok { border: 1.5px solid var(--teal); font-weight: 500; outline: none; }
 .form-ok p { margin-bottom: 1em; }
 
