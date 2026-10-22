@@ -24,13 +24,15 @@
         'about.p1': 'PyCon Colombia is a non-profit conference organized by volunteers from the Python community. Every year we bring together developers, data scientists, students and teachers to learn, share and connect.',
         'about.p2': 'In 2028 we celebrate our eleventh edition inspired by the Amazon: a diverse, interconnected ecosystem full of life, just like our community.',
         'cd.title': 'Starts in', 'cd.days': 'days', 'cd.hours': 'hours', 'cd.mins': 'min', 'cd.secs': 'sec',
-        'stats.people': '+ attendees', 'stats.talks': 'talks', 'stats.workshops': '+ workshops', 'stats.keynotes': 'keynotes',
+        'stats.people': '+ attendees', 'stats.talks': 'talks', 'stats.workshops': 'workshops', 'stats.keynotes': 'keynotes',
         'kn.title': 'Keynotes, <span>the voices that open and close each day</span>',
         'sp.kicker': 'Speakers', 'sp.title': 'Introducing our speakers, <span>the voices behind the talks</span>',
         'sch.kicker': 'Program', 'sch.mine': 'My schedule',
         'teaser.title': 'Build your 3-day schedule', 'teaser.btn': 'See the schedule',
         'teaser.p': 'Browse talks, workshops and keynotes, filter by track, level or language, save your favorites and find your way to every room on campus.',
-        'tk.kicker': 'Join the pack', 'tk.title': 'Tickets', 'tk.lead': 'Prices in Colombian pesos. All tickets include the 3 days, meals and welcome kit.',
+        'tk.kicker': 'Join the pack', 'tk.title': 'Tickets', 'tk.lead': 'Prices in US dollars. All tickets include the 3 days, meals and welcome kit.',
+        // En inglés los precios van en dólares (referencia: 1 USD ≈ 4.000 COP)
+        'tk.p1': '$45 <small>USD</small>', 'tk.p2': '$90 <small>USD</small>', 'tk.p3': '$190 <small>USD</small>',
         'tk.student': 'Student', 'tk.general': 'General', 'tk.corp': 'Corporate', 'tk.grant': 'Financial aid',
         'tk.all': 'Access to all 3 days', 'tk.food': 'Meals included', 'tk.studentReq': 'Valid student ID required',
         'tk.kit': 'Kit & official t-shirt', 'tk.invoice': 'Electronic invoice', 'tk.support': 'You support the community',
@@ -89,16 +91,30 @@
     const toggle = $('.nav-toggle');
     const nav = $('#main-nav');
     const toTop = $('.to-top');
-    const closeNav = () => { header.classList.remove('is-open'); toggle.setAttribute('aria-expanded', 'false'); };
+    const menuReveal = $('.menu-reveal');
+    const closeNav = () => {
+        header.classList.remove('is-open'); toggle.setAttribute('aria-expanded', 'false');
+        if (header.classList.contains('is-pinned')) { header.classList.remove('is-pinned'); menuReveal.setAttribute('aria-expanded', 'false'); onScroll(); }
+    };
 
     toggle.addEventListener('click', () => toggle.setAttribute('aria-expanded', String(header.classList.toggle('is-open'))));
+
+    // Botón "Menú" del inicio: muestra la barra superior sin tener que hacer scroll
+    // (en móvil además abre la lista de enlaces) y lleva el foco al primer enlace
+    menuReveal.addEventListener('click', () => {
+        header.classList.add('is-pinned');
+        menuReveal.setAttribute('aria-expanded', 'true');
+        onScroll();
+        if (getComputedStyle(toggle).display !== 'none') { header.classList.add('is-open'); toggle.setAttribute('aria-expanded', 'true'); }
+        setTimeout(() => $('a', nav)?.focus({ preventScroll: true }), 120);
+    });
     nav.addEventListener('click', (e) => { if (e.target.closest('a')) closeNav(); });
     addEventListener('keydown', (e) => { if (e.key === 'Escape') closeNav(); });
     document.addEventListener('click', (e) => { if (!header.contains(e.target)) closeNav(); });
 
     const onScroll = () => {
         const inView = document.body.classList.contains('in-view');
-        const scrolled = inView || scrollY > 60;
+        const scrolled = inView || scrollY > 60 || header.classList.contains('is-pinned');
         header.classList.toggle('is-scrolled', scrolled);
         if (!scrolled) closeNav();
         toTop.classList.toggle('is-visible', scrollY > innerHeight * 1.2);
@@ -136,9 +152,16 @@
     const PEOPLE = Object.fromEntries([...D.KEYNOTES, ...D.SPEAKERS].map((p) => [p.id, p]));
     const initials = (p) => (p.tba ? '?' : pick(p.name).split(' ').filter(Boolean).slice(0, 2).map((w) => w[0]).join(''));
     const SOCIAL = [['gh', 'GitHub'], ['in', 'LinkedIn'], ['x', 'X'], ['ig', 'Instagram'], ['web', 'Web']];
-    const socialHTML = () => SOCIAL.map(([k, label]) =>
-        `<li><a href="#" aria-label="${label}"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#ico-${k}"/></svg></a></li>`).join('');
-    const avatarHTML = (p, cls = '') => `<div class="avatar ${cls}" style="--hue:${p.hue}" aria-hidden="true"><span>${initials(p)}</span></div>`;
+    // Cada botón lleva a la red de la persona (p.social[red]); si aún no hay enlace,
+    // a la página "cuenta no habilitada" (#/cuenta/<persona>/<red>)
+    const socialHTML = (p) => SOCIAL.map(([k, label]) => {
+        const url = p?.social?.[k];
+        const href = url ? esc(url) : `#/cuenta/${p?.id || 'pycon'}/${k}`;
+        return `<li><a href="${href}"${url ? ' target="_blank" rel="noopener"' : ''} aria-label="${label}${p ? ` · ${esc(pick(p.name))}` : ''}"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#ico-${k}"/></svg></a></li>`;
+    }).join('');
+    const SOCIAL_NAMES = Object.fromEntries(SOCIAL);
+    const avatarInner = (p) => (p.photo ? `<img src="${p.photo}" alt="" loading="lazy" decoding="async">` : `<span>${initials(p)}</span>`);
+    const avatarHTML = (p, cls = '') => `<div class="avatar ${p.photo ? 'avatar--photo ' : ''}${cls}" style="--hue:${p.hue}" aria-hidden="true">${avatarInner(p)}</div>`;
 
     function cardHTML(p) {
         const name = pick(p.name);
@@ -149,12 +172,12 @@
                 <p class="speaker__role">${esc(pick(p.role))}</p>
             </div>
             <p class="speaker__bio">${esc(pick(p.bio).split('. ')[0].replace(/\.$/, ''))}.</p>
-            <ul class="social">${socialHTML()}</ul>
+            <ul class="social">${socialHTML(p)}</ul>
             <button class="speaker__open" type="button" data-open-speaker="${p.id}"><span class="sr-only">${UI[lang].view} ${esc(name)}</span></button>
         </li>`;
     }
+    // Los keynotes viven en su propia página (#/keynotes, en views.js)
     function renderPeople() {
-        $('#keynotes-list').innerHTML = D.KEYNOTES.map(cardHTML).join('');
         $('#speakers-list').innerHTML = D.SPEAKERS.map(cardHTML).join('');
     }
 
@@ -163,15 +186,17 @@
     const tagLabel = (map, k) => pick(map[k]);
     function fillModal(id) {
         const p = PEOPLE[id], ev = D.EVENTS[p.talk];
-        $('#sm-avatar').style.setProperty('--hue', p.hue);
-        $('#sm-avatar span').textContent = initials(p);
+        const av = $('#sm-avatar');
+        av.style.setProperty('--hue', p.hue);
+        av.classList.toggle('avatar--photo', !!p.photo);
+        av.innerHTML = avatarInner(p);
         $('#sm-name').textContent = pick(p.name);
         $('#sm-role').textContent = pick(p.role);
         $('#sm-bio').textContent = pick(p.bio);
         $('#sm-talk').textContent = pick(ev.title);
         $('#sm-tags').innerHTML = [tagLabel(D.TRACKS, ev.track), tagLabel(D.FORMATS, ev.format), tagLabel(D.LEVELS, ev.level), tagLabel(D.LANGS, ev.lang)]
             .map((t) => `<li class="tag tag--fill">${esc(t)}</li>`).join('');
-        $('#sm-social').innerHTML = socialHTML();
+        $('#sm-social').innerHTML = socialHTML(p);
         $('#sm-talk-link').href = `#/charla/${p.id}`;
         $('[data-close]', modal).setAttribute('aria-label', UI[lang].close);
     }
@@ -187,25 +212,18 @@
     });
     modal.addEventListener('click', (e) => {
         if (e.target === modal || e.target.closest('[data-close]')) modal.close();
-        if (e.target.closest('#sm-talk-link')) { lastFocus = null; modal.close(); }
+        // cualquier enlace a otra página (la charla, una red social) cierra el perfil
+        if (e.target.closest('a[href^="#/"]')) { lastFocus = null; modal.close(); }
     });
     modal.addEventListener('close', () => { openId = null; lastFocus?.focus?.(); });
 
     /* =====================================================================
-       Patrocinadores: cada tarjeta es un botón a su página
+       Patrocinadores: la página está en views.js (#/patrocinadores)
        ===================================================================== */
     const logoHTML = (s, big = false) => `<span class="sponsor-logo${big ? ' sponsor-logo--big' : ''}" style="--brand:${s.color}" aria-hidden="true"><b>${esc(s.mono)}</b></span>`;
-    function renderSponsors() {
-        $('#sponsor-tiers').innerHTML = D.TIERS.map(([tier, label]) => {
-            const list = D.SPONSORS.filter((s) => s.tier === tier);
-            return `<h3 class="tier"><span>${esc(pick(label))}</span></h3>
-                <ul class="logos logos--${tier}">${list.map((s) => `
-                    <li><a class="inset sponsor-card" href="#/patrocinador/${s.id}">
-                        ${logoHTML(s)}<span class="sponsor-card__name">${esc(s.name)}</span>
-                        <span class="sponsor-card__more">${UI[lang].sponsorOf} <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#ico-next"/></svg></span>
-                    </a></li>`).join('')}</ul>`;
-        }).join('');
-    }
+
+    /* Cifras de "Acerca": charlas, talleres y keynotes se cuentan en la agenda */
+    $$('[data-stat]').forEach((el) => { el.dataset.count = D.COUNTS.total[el.dataset.stat] || 0; });
 
     /* =====================================================================
        Aparición al hacer scroll + contadores
@@ -269,11 +287,10 @@
     const saveMine = () => store.set('pycon-mine', JSON.stringify([...mine]));
 
     renderPeople();
-    renderSponsors();
-    langHandlers.push(renderPeople, renderSponsors, () => { if (openId) fillModal(openId); });
+    langHandlers.push(renderPeople, () => { if (openId) fillModal(openId); });
 
     window.PYAPP = {
-        $, $$, esc, pick, store, mine, saveMine, PEOPLE, initials, avatarHTML, socialHTML, logoHTML, openSpeaker, observeReveals, onScroll, clearActive,
+        $, $$, esc, pick, store, mine, saveMine, PEOPLE, initials, avatarHTML, socialHTML, SOCIAL_NAMES, logoHTML, openSpeaker, observeReveals, onScroll, clearActive, UI,
         get lang() { return lang; },
         onLang: (fn) => langHandlers.push(fn),
         setLang

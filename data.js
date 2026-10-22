@@ -103,10 +103,21 @@ window.PYCON = (() => {
         { id: 'k2', name: 'Ingrid Mejía', hue: 300, role: { es: 'Educación y comunidad', en: 'Education & community' },
           bio: { es: 'Fundadora de programas que han enseñado Python a miles de estudiantes de colegios públicos del país.',
                  en: 'Founder of programs that have taught Python to thousands of public school students across the country.' }, talk: 'd2-1' },
+        { id: 'k4', name: 'Mateo Arango', hue: 100, role: { es: 'Ingeniero de software en salud pública', en: 'Software engineer in public health' },
+          bio: { es: 'Construye con Python los sistemas de alertas tempranas que usan hospitales de la región para anticipar brotes de enfermedades tropicales.',
+                 en: 'Builds with Python the early-warning systems that hospitals in the region use to anticipate tropical disease outbreaks.' }, talk: 'd1-9' },
         { id: 'k3', name: { es: 'Por anunciar', en: 'To be announced' }, hue: 40, tba: true, role: { es: 'Core developer de CPython', en: 'CPython core developer' },
           bio: { es: 'Muy pronto revelaremos a nuestra keynote de cierre. ¡Síguenos en redes para enterarte primero!',
                  en: 'We will reveal our closing keynote very soon. Follow us on social media to be the first to know!' }, talk: 'd2-7' }
     ];
+
+    // Fotos (assets/people/<id>.jpg; la keynote por anunciar usa una silueta) y redes sociales.
+    // Las redes aún no tienen enlaces: mientras social[red] esté vacío, el botón lleva a la página
+    // "cuenta no habilitada". Para activar una, p. ej.: social: { ig: 'https://instagram.com/usuario' }
+    [...SPEAKERS, ...KEYNOTES].forEach((p) => {
+        p.photo = p.tba ? 'assets/people/tba.svg' : `assets/people/${p.id}.jpg`;
+        p.social = p.social || {};
+    });
 
     /* ---------------------------------------------------------------- */
     /*  Agenda                                                           */
@@ -155,6 +166,8 @@ window.PYCON = (() => {
                { es: 'Vectores, similitud del coseno y por qué tu buscador semántico a veces se equivoca.', en: 'Vectors, cosine similarity and why your semantic search sometimes gets it wrong.' }),
             ev('15:00', '15:30', { es: 'Secretos fuera del código', en: 'Keeping secrets out of code' }, 's7', 'rio', 'sec', 'talk', 'beginner', 'es',
                { es: 'Variables de entorno, gestores de secretos y cómo evitar subir tu API key a GitHub.', en: 'Environment variables, secret managers and how to avoid pushing your API key to GitHub.' }),
+            ev('15:45', '16:30', { es: 'Keynote: Python contra el dengue', en: 'Keynote: Python against dengue' }, 'k4', 'fund', 'sci', 'keynote', 'beginner', 'es',
+               { es: 'Cómo datos de clima, movilidad y reportes hospitalarios se combinan en Python para anticipar brotes semanas antes.', en: 'How climate, mobility and hospital data come together in Python to anticipate outbreaks weeks in advance.' }),
             BR('16:30', '17:00', { es: 'Refrigerio', en: 'Snack break' }, 'plaza'),
             ev('17:00', '18:00', 'Lightning talks', '', 'fund', 'com', 'lightning', 'beginner', 'es',
                { es: '5 minutos, cualquier tema, mucha energía. Inscríbete en el registro.', en: '5 minutes, any topic, lots of energy. Sign up at registration.' }),
@@ -188,6 +201,11 @@ window.PYCON = (() => {
     EVENTS['d1-2'].agenda = STUART_AGENDA;
     EVENTS['d1-2'].also = ['ai']; // etiquetas del Figma: Inteligencia Artificial + Seguridad
     const RECOMMENDED = 'd1-2';
+
+    // Conteos por formato (totales y por día): las cifras de la landing y de la agenda salen
+    // de aquí, así siempre coinciden con los eventos reales
+    const countOf = (list) => list.reduce((c, e) => { if (e.format !== 'break') c[e.format] = (c[e.format] || 0) + 1; return c; }, {});
+    const COUNTS = { total: countOf(DAYS.flatMap((d) => d.events)), days: DAYS.map((d) => countOf(d.events)) };
 
     /* ---------------------------------------------------------------- */
     /*  Patrocinadores (marcas ficticias para la maqueta, salvo la sede) */
@@ -228,24 +246,44 @@ window.PYCON = (() => {
     /* ---------------------------------------------------------------- */
     /*  Código de conducta                                               */
     /* ---------------------------------------------------------------- */
-    const COC = {
-        es: [
-            ['Nuestro compromiso', 'PyCon Colombia es una conferencia dedicada a ofrecer una experiencia libre de acoso para todas las personas, sin importar su género, identidad o expresión de género, orientación sexual, discapacidad, apariencia física, tamaño corporal, etnia, edad, religión, nacionalidad o nivel de experiencia. No toleramos el acoso en ninguna de sus formas.'],
-            ['Comportamiento esperado', 'Sé amable y paciente. Respeta los diferentes puntos de vista y experiencias. Usa un lenguaje inclusivo. Acepta la crítica constructiva con gracia. Cuida a las demás personas: si ves a alguien en apuros, ofrece ayuda o avisa al equipo organizador.'],
-            ['Comportamiento inaceptable', 'Comentarios ofensivos o discriminatorios, intimidación, acecho, seguimiento, fotografías o grabaciones no deseadas, interrupción reiterada de charlas u otros eventos, contacto físico inapropiado y atención sexual no deseada. El lenguaje e imágenes sexuales no son apropiados en ningún espacio de la conferencia, incluidas charlas, talleres, fiestas, redes sociales y medios en línea.'],
-            ['Alcance', 'Este código aplica a asistentes, ponentes, patrocinadores, voluntarios y equipo organizador, en todos los espacios de la conferencia: sedes, eventos sociales, canales en línea y redes sociales relacionadas con PyCon Colombia.'],
-            ['Cómo reportar', 'Si sufres o presencias un comportamiento inaceptable, o tienes cualquier otra inquietud, contacta de inmediato al equipo organizador (camisetas naranjas) o escríbenos a conducta@pycon.co. También puedes usar el formulario de reporte, que puede ser anónimo. Todos los reportes se tratan con confidencialidad.'],
-            ['Consecuencias', 'Las personas a quienes se les pida detener un comportamiento inaceptable deben hacerlo de inmediato. El equipo organizador puede tomar cualquier acción que considere adecuada, incluida una advertencia o la expulsión de la conferencia sin reembolso.']
-        ],
-        en: [
-            ['Our pledge', 'PyCon Colombia is dedicated to providing a harassment-free experience for everyone, regardless of gender, gender identity and expression, sexual orientation, disability, physical appearance, body size, ethnicity, age, religion, nationality or level of experience. We do not tolerate harassment in any form.'],
-            ['Expected behavior', 'Be kind and patient. Respect differing viewpoints and experiences. Use inclusive language. Gracefully accept constructive criticism. Look out for each other: if you see someone in distress, offer help or alert the organizing team.'],
-            ['Unacceptable behavior', 'Offensive or discriminatory comments, intimidation, stalking, following, unwanted photography or recording, sustained disruption of talks or other events, inappropriate physical contact and unwelcome sexual attention. Sexual language and imagery is not appropriate in any conference venue, including talks, workshops, parties, social media and online channels.'],
-            ['Scope', 'This code applies to attendees, speakers, sponsors, volunteers and organizers in every conference space: venues, social events, online channels and social media related to PyCon Colombia.'],
-            ['How to report', 'If you experience or witness unacceptable behavior, or have any other concerns, contact the organizing team immediately (orange t-shirts) or email conducta@pycon.co. You can also use the report form, which can be anonymous. All reports are handled confidentially.'],
-            ['Consequences', 'Participants asked to stop any unacceptable behavior are expected to comply immediately. Organizers may take any action they deem appropriate, including a warning or expulsion from the conference without a refund.']
-        ]
-    };
+    // Texto oficial, tal cual fue entregado (se muestra igual en ambos idiomas).
+    // Cada sección: [título, párrafos, lista de viñetas opcional, párrafos después de la lista]
+    const COC = [
+        ['Introduction', [
+            'PyCon Colombia is a conference organized by members of this country\'s Python community to promote this programming language throughout the national territory and in Latin America. The goal of this space is to position Colombia as a global technology reference point, creating a collaborative knowledge network that expands opportunities for interaction and exchange among attendees and community members.',
+            'To fulfill this purpose, it\'s important that every conference attendee has an enriching experience full of learning. We believe that each person who is part of this space has something valuable to contribute. For this reason, the following code of conduct specifies what is expected of all participants; at the conference and related events, everyone, regardless of role, must comply with these rules to guarantee an environment free of prejudice and harassment, where all interactions take place within a framework of respect, dignity, and dialogue. Additionally, those organizing this event are obligated to comply with Colombian and international laws, as well as those of the Python Software Foundation.'
+        ]],
+        ['Code of Conduct Content', [
+            'PyCon Colombia is dedicated to providing a harassment-free conference for everyone, regardless of sexual orientation, gender identity, ethnic or racial origin, disabilities or health conditions, religion or beliefs, age, social class, and physical appearance. No form of discrimination or abuse by participants will be tolerated.',
+            'Communication and opinions expressed at the conference and other events must take into account the diversity of backgrounds and experiences of the participating audience. Sexual language is not appropriate at any event organized under our rules, including talks.'
+        ]],
+        ['Our Goals as a Community', [
+            'Promoting a respectful and safe environment for everyone is a priority for PyCon Colombia. For this reason, we promote behaviors and attitudes consistent with this goal, including:'
+        ], [
+            'Active and respectful listening to other participants, even when they hold different points of view',
+            'Kindness and openness to collaborate with others',
+            'Constructive contributions that strengthen the community and its experiences',
+            'Recognizing and valuing the time and effort of other participants and volunteers',
+            'Expressing opinions respectfully, calmly, and constructively',
+            'Using inclusive language that respects people\'s identities',
+            'Promoting the inclusion and participation of all people regardless of differences in age, sexual orientation, gender identity, ethnic or racial origin, social class, disabilities or health conditions, religion or beliefs, and physical appearance',
+            'Making use of conference resources and materials while citing sources'
+        ]],
+        ['Inappropriate Conduct', [
+            'Below is a list of examples of inappropriate behaviors that will not be accepted at the conference and related events:'
+        ], [
+            'Discriminatory, offensive, or aggressive comments or behaviors that reinforce stereotypes or prejudices based on class, gender, race, physical appearance, among others',
+            'Any form of harassment (physical, sexual, digital, discriminatory)',
+            'Physical contact without consent or unwanted advances',
+            'Use of sexual or intimidating language, including anecdotes, sexual jokes, and comments about clothing or body parts',
+            'Using participants\' private information without their consent',
+            'Any form of violence against others'
+        ]],
+        ['Enforcement', [
+            'If someone fails to comply with the norms and accepted behaviors at the PyCon Colombia conference and related events, they will be warned about it, and depending on the severity of the behavior, their expulsion from the event without refund will be considered.',
+            'Thank you for abiding by these norms, which help create a respectful, kind, and constructive environment for all PyCon Colombia participants.'
+        ]]
+    ];
 
     /* ---------------------------------------------------------------- */
     /*  Mapa del campus (coordenadas en el SVG de 800 × 520)              */
@@ -267,5 +305,5 @@ window.PYCON = (() => {
         starts: ['gate', 'metro', 'reg', 'park']
     };
 
-    return { ROOMS, TRACKS, FORMATS, LEVELS, LANGS, SPEAKERS, KEYNOTES, DAYS, EVENTS, RECOMMENDED, SPONSORS, TIERS, COC, MAP };
+    return { ROOMS, TRACKS, FORMATS, LEVELS, LANGS, SPEAKERS, KEYNOTES, DAYS, EVENTS, RECOMMENDED, COUNTS, SPONSORS, TIERS, COC, MAP };
 })();

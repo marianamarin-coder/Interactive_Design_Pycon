@@ -55,10 +55,10 @@
             </a>
 
             <nav class="main-nav" id="main-nav" aria-label="Menú principal">
-                <a href="#keynotes">Keynotes</a>
+                <a href="#/keynotes" data-route="keynotes">Keynotes</a>
                 <a href="#ponentes" data-i18n="nav.speakers">Ponentes</a>
                 <a href="#/agenda" data-route="agenda" data-i18n="nav.schedule">Agenda</a>
-                <a href="#patrocinadores" data-i18n="nav.sponsors">Patrocinadores</a>
+                <a href="#/patrocinadores" data-route="patrocinadores" data-i18n="nav.sponsors">Patrocinadores</a>
                 <a href="#lugar" data-i18n="nav.venue">Lugar</a>
                 <a href="#/codigo-de-conducta" data-route="codigo-de-conducta" data-i18n="nav.coc">Código de conducta</a>
                 <a class="btn btn--primary btn--sm main-nav__cta" href="#boletas" data-i18n="cta.buy">Comprar boleta</a>
@@ -70,7 +70,12 @@
             </button>
         </div>
 
-        <!-- Único control visible desde el inicio -->
+        <!-- Al entrar: botón que despliega el menú superior (la barra aparece sola al hacer scroll) -->
+        <button class="menu-reveal glass" type="button" aria-controls="main-nav" aria-expanded="false">
+            <span class="menu-reveal__icon" aria-hidden="true"><i></i><i></i><i></i></span>
+            <span data-i18n="menu">Menú</span>
+        </button>
+
         <button class="lang-toggle glass" type="button" aria-label="Cambiar idioma / Change language">
             <span class="lang-toggle__thumb" aria-hidden="true"></span>
             <span data-lang="es" class="is-active">ES</span>
@@ -137,11 +142,12 @@
                     </div>
                 </div>
 
+                <!-- data-stat: la cifra se calcula con los eventos de la agenda (PYCON.COUNTS) -->
                 <ul class="stats">
                     <li class="stat"><b data-count="600">0</b><span data-i18n="stats.people">+ asistentes</span></li>
-                    <li class="stat"><b data-count="30">0</b><span data-i18n="stats.talks">charlas</span></li>
-                    <li class="stat"><b data-count="15">0</b><span data-i18n="stats.workshops">+ talleres</span></li>
-                    <li class="stat"><b data-count="5">0</b><span data-i18n="stats.keynotes">keynotes</span></li>
+                    <li class="stat"><b data-stat="talk">0</b><span data-i18n="stats.talks">charlas</span></li>
+                    <li class="stat"><b data-stat="workshop">0</b><span data-i18n="stats.workshops">talleres</span></li>
+                    <li class="stat"><a href="#/keynotes" class="stat__link"><b data-stat="keynote">0</b><span data-i18n="stats.keynotes">keynotes</span></a></li>
                 </ul>
             </div>
         </section>
@@ -155,7 +161,7 @@
             <ul class="tickets">
                 <li class="card ticket reveal">
                     <h3 data-i18n="tk.student">Estudiante</h3>
-                    <p class="ticket__price">$180.000 <small>COP</small></p>
+                    <p class="ticket__price" data-i18n="tk.p1">$180.000 <small>COP</small></p>
                     <ul class="checks">
                         <li data-i18n="tk.all">Acceso a los 3 días</li>
                         <li data-i18n="tk.food">Alimentación incluida</li>
@@ -166,7 +172,7 @@
                 <li class="card card--frame ticket ticket--featured reveal">
                     <span class="ticket__badge" data-i18n="tk.popular">Más popular</span>
                     <h3 data-i18n="tk.general">General</h3>
-                    <p class="ticket__price">$350.000 <small>COP</small></p>
+                    <p class="ticket__price" data-i18n="tk.p2">$350.000 <small>COP</small></p>
                     <ul class="checks">
                         <li data-i18n="tk.all">Acceso a los 3 días</li>
                         <li data-i18n="tk.food">Alimentación incluida</li>
@@ -176,7 +182,7 @@
                 </li>
                 <li class="card ticket reveal">
                     <h3 data-i18n="tk.corp">Corporativa</h3>
-                    <p class="ticket__price">$750.000 <small>COP</small></p>
+                    <p class="ticket__price" data-i18n="tk.p3">$750.000 <small>COP</small></p>
                     <ul class="checks">
                         <li data-i18n="tk.all">Acceso a los 3 días</li>
                         <li data-i18n="tk.invoice">Factura electrónica</li>
@@ -197,17 +203,10 @@
             </ul>
         </section>
 
-        <!-- ===================== KEYNOTES ===================== -->
-        <section class="section" id="keynotes" aria-labelledby="keynotes-title" data-tour="0.33">
-            <header class="section-head card reveal">
-                <p class="eyebrow">Keynotes</p>
-                <h2 class="title title--xl" id="keynotes-title" data-i18n="kn.title">Keynotes, <span>las voces que abren y cierran cada día</span></h2>
-            </header>
-            <ul class="speakers" id="keynotes-list"></ul>
-        </section>
+        <!-- Keynotes y patrocinadores tienen su propia página (#/keynotes, #/patrocinadores) -->
 
         <!-- ===================== PONENTES ===================== -->
-        <section class="section" id="ponentes" aria-labelledby="speakers-title" data-tour="0.385">
+        <section class="section" id="ponentes" aria-labelledby="speakers-title" data-tour="0.36">
             <header class="section-head card reveal">
                 <p class="eyebrow" data-i18n="sp.kicker">Ponentes</p>
                 <h2 class="title title--xl" id="speakers-title" data-i18n="sp.title">Te presentamos a los ponentes, <span>las voces detrás de las charlas</span></h2>
@@ -216,7 +215,7 @@
         </section>
 
         <!-- ===================== ACCESO A LA AGENDA (página aparte) ===================== -->
-        <section class="section" id="agenda-teaser" aria-labelledby="teaser-title" data-tour="0.47">
+        <section class="section" id="agenda-teaser" aria-labelledby="teaser-title" data-tour="0.5">
             <div class="card card--frame teaser reveal">
                 <div>
                     <p class="eyebrow" data-i18n="sch.kicker">Programa</p>
@@ -227,16 +226,6 @@
                     <a class="btn btn--primary" href="#/agenda" data-i18n="teaser.btn">Ver la agenda</a>
                     <a class="btn btn--outline" href="#/agenda/mi" data-i18n="sch.mine">Mi agenda</a>
                 </div>
-            </div>
-        </section>
-
-        <!-- ===================== PATROCINADORES ===================== -->
-        <section class="section" id="patrocinadores" aria-labelledby="sponsors-title" data-tour="0.53">
-            <div class="card card--frame sponsors reveal">
-                <h2 class="title title--xl" id="sponsors-title" data-i18n="spo.title">Con el respaldo de líderes de la industria</h2>
-                <p class="sponsors__lead" data-i18n="spo.lead">PyCon Colombia es posible gracias al apoyo de organizaciones comprometidas con el ecosistema Python y la innovación tecnológica en Latinoamérica.</p>
-                <a class="btn btn--primary" href="mailto:sponsors@pycon.co" data-i18n="spo.btn">Sé patrocinador</a>
-                <div id="sponsor-tiers"></div>
             </div>
         </section>
 
@@ -340,7 +329,8 @@
                 <ul>
                     <li><a href="#/codigo-de-conducta" data-i18n="nav.coc">Código de conducta</a></li>
                     <li><a href="#/agenda" data-i18n="nav.schedule">Agenda</a></li>
-                    <li><a href="#patrocinadores" data-i18n="nav.sponsors">Patrocinadores</a></li>
+                    <li><a href="#/keynotes">Keynotes</a></li>
+                    <li><a href="#/patrocinadores" data-i18n="nav.sponsors">Patrocinadores</a></li>
                     <li><a href="#faq">FAQ</a></li>
                 </ul>
             </nav>

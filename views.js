@@ -6,8 +6,11 @@
    #/agenda?d=0&p=1           Agenda general (día y página)
    #/agenda/mi?p=1            Mi agenda (eventos guardados)
    #/agenda/evento/d1-2       Evento + mapa del campus con la ruta a la sala
-   #/charla/s0                Charla de un ponente (vista "talk" del Figma)
+   #/charla/s0                Charla de un ponente o keynote (vista "talk" del Figma)
+   #/keynotes                 Keynotes con su información detallada
+   #/patrocinadores           Patrocinadores por categoría
    #/patrocinador/ceiba       Patrocinador (vista "sponsor" del Figma)
+   #/cuenta/s0/ig             Red social que aún no está habilitada
    #/codigo-de-conducta       Código de conducta
    #/codigo-de-conducta/reporte   Formulario de reporte
    #/voluntariado             Registro de voluntarios
@@ -53,7 +56,26 @@
             cocAgree: 'Leí y acepto el código de conducta *', register: 'Enviar registro', volOk: (n) => `¡Gracias, ${n}! Recibimos tu registro como voluntario. Pronto te escribiremos 🌿`,
             pickOne: 'Elige al menos una opción.', emailErr: 'Escribe un correo válido.', backHome: 'Volver al inicio', newReport: 'Enviar otro reporte',
             areaOpts: ['Logística', 'Registro', 'Redes sociales', 'Diseño', 'Acompañar ponentes', 'Sprints y talleres'],
-            dayOpts: ['Viernes 14', 'Sábado 15', 'Domingo 16']
+            dayOpts: ['Viernes 14', 'Sábado 15', 'Domingo 16'],
+            kTitle: 'Keynotes, <span>las voces que abren y cierran cada día</span>',
+            kLead: (n, d) => `${n} keynotes repartidas en los ${d} días de la conferencia. Conoce a cada persona y guarda su charla en tu agenda o en tu calendario.`,
+            viewTalkShort: 'Ver charla', viewProfile: 'Ver perfil', talkLabel: 'Charla',
+            spoTitle: 'Con el respaldo de líderes de la industria', spoBtn: 'Sé patrocinador',
+            spoLead: 'PyCon Colombia es posible gracias al apoyo de organizaciones comprometidas con el ecosistema Python y la innovación tecnológica en Latinoamérica.',
+            sponsorOf: 'Ver patrocinador',
+            accTitle: 'Esta cuenta no está habilitada',
+            accP: (net, name) => `La cuenta de ${net} de ${name} no está habilitada en este momento. Cuando esté disponible, este botón te llevará directamente a su perfil.`,
+            accPycon: (net) => `La cuenta de ${net} no está habilitada en este momento.`,
+            goBack: 'Volver', seeSpeakers: 'Ver ponentes', seeKeynotes: 'Ver keynotes',
+            addCal: 'Añadir a mi calendario', calOk: 'Descargamos el evento (.ics): ábrelo para agregarlo a tu calendario.',
+            noDay: (q, d) => `No hay resultados para «${q}» el ${d}.`,
+            noDayF: (d) => `No hay resultados con estos filtros el ${d}.`,
+            otherDays: (n) => `Encontramos ${n} ${n === 1 ? 'resultado' : 'resultados'} en otros días:`,
+            goDay: (d) => `Ver el ${d}`,
+            noneAll: (q) => `No encontramos nada para «${q}» en los 3 días. Te sugerimos:`,
+            suggestions: 'Sugerencias para ti',
+            perDay: { keynote: ['keynote', 'keynotes'], talk: ['charla', 'charlas'], workshop: ['taller', 'talleres'], lightning: ['bloque de lightning talks', 'bloques de lightning talks'] },
+            activities: (n) => `${n} ${n === 1 ? 'actividad' : 'actividades'}`
         },
         en: {
             home: 'Home', program: 'Program', schedule: 'PyCon Colombia 2028 Schedule', mine: 'My schedule', dates: 'July 14, 15 & 16, 2028',
@@ -87,7 +109,26 @@
             cocAgree: 'I have read and accept the code of conduct *', register: 'Send registration', volOk: (n) => `Thank you, ${n}! We received your volunteer registration. We will write to you soon 🌿`,
             pickOne: 'Choose at least one option.', emailErr: 'Please enter a valid email.', backHome: 'Back to home', newReport: 'Send another report',
             areaOpts: ['Logistics', 'Registration', 'Social media', 'Design', 'Supporting speakers', 'Sprints & workshops'],
-            dayOpts: ['Friday 14', 'Saturday 15', 'Sunday 16']
+            dayOpts: ['Friday 14', 'Saturday 15', 'Sunday 16'],
+            kTitle: 'Keynotes, <span>the voices that open and close each day</span>',
+            kLead: (n, d) => `${n} keynotes across the ${d} days of the conference. Meet each speaker and save their talk to your schedule or your calendar.`,
+            viewTalkShort: 'View talk', viewProfile: 'View profile', talkLabel: 'Talk',
+            spoTitle: 'Trusted by industry leaders', spoBtn: 'Become a sponsor',
+            spoLead: 'PyCon Colombia is made possible through the generous support of organizations dedicated to advancing the Python ecosystem and fostering technological innovation in Latin America.',
+            sponsorOf: 'View sponsor',
+            accTitle: 'This account is not available',
+            accP: (net, name) => `${name}'s ${net} account is not available at the moment. Once it is, this button will take you straight to their profile.`,
+            accPycon: (net) => `The ${net} account is not available at the moment.`,
+            goBack: 'Go back', seeSpeakers: 'See speakers', seeKeynotes: 'See keynotes',
+            addCal: 'Add to my calendar', calOk: 'We downloaded the event (.ics): open it to add it to your calendar.',
+            noDay: (q, d) => `No results for “${q}” on ${d}.`,
+            noDayF: (d) => `No results with these filters on ${d}.`,
+            otherDays: (n) => `We found ${n} ${n === 1 ? 'result' : 'results'} on other days:`,
+            goDay: (d) => `See ${d}`,
+            noneAll: (q) => `We found nothing for “${q}” in the 3 days. You might like:`,
+            suggestions: 'Suggestions for you',
+            perDay: { keynote: ['keynote', 'keynotes'], talk: ['talk', 'talks'], workshop: ['workshop', 'workshops'], lightning: ['lightning talks block', 'lightning talks blocks'] },
+            activities: (n) => `${n} ${n === 1 ? 'activity' : 'activities'}`
         }
     };
     const t = () => T[A.lang];
@@ -110,15 +151,18 @@
         if (parts[0] === 'agenda' && parts[1] === 'evento' && D.EVENTS[parts[2]]) return { kind: 'event', id: parts[2], query };
         if (parts[0] === 'agenda') return { kind: 'schedule', query };
         if (parts[0] === 'charla' && A.PEOPLE[parts[1]]) return { kind: 'talk', id: parts[1] };
+        if (parts[0] === 'keynotes') return { kind: 'keynotes' };
+        if (parts[0] === 'patrocinadores') return { kind: 'sponsors' };
         if (parts[0] === 'patrocinador' && D.SPONSORS.some((s) => s.id === parts[1])) return { kind: 'sponsor', id: parts[1] };
+        if (parts[0] === 'cuenta' && A.SOCIAL_NAMES[parts[2]]) return { kind: 'account', id: parts[1], net: parts[2] };
         if (parts[0] === 'codigo-de-conducta' && parts[1] === 'reporte') return { kind: 'report' };
         if (parts[0] === 'codigo-de-conducta') return { kind: 'coc' };
         if (parts[0] === 'voluntariado') return { kind: 'volunteer' };
         return { kind: 'notfound' };
     }
 
-    const RENDER = { schedule: renderSchedule, mine: renderMine, event: renderEvent, talk: renderTalk, sponsor: renderSponsor, coc: renderCoc, report: renderReport, volunteer: renderVolunteer, notfound: renderNotFound };
-    const NAV_ROUTE = { schedule: 'agenda', mine: 'agenda', event: 'agenda', coc: 'codigo-de-conducta', report: 'codigo-de-conducta' };
+    const RENDER = { schedule: renderSchedule, mine: renderMine, event: renderEvent, talk: renderTalk, keynotes: renderKeynotes, sponsors: renderSponsors, sponsor: renderSponsor, account: renderAccount, coc: renderCoc, report: renderReport, volunteer: renderVolunteer, notfound: renderNotFound };
+    const NAV_ROUTE = { schedule: 'agenda', mine: 'agenda', event: 'agenda', keynotes: 'keynotes', sponsors: 'patrocinadores', sponsor: 'patrocinadores', coc: 'codigo-de-conducta', report: 'codigo-de-conducta' };
 
     function route() {
         const r = parse();
@@ -130,7 +174,8 @@
         view.hidden = false;
         A.onScroll();
         A.clearActive();
-        const navLink = $(`#main-nav [data-route="${NAV_ROUTE[r.kind]}"]`);
+        const navKey = r.kind === 'talk' && r.id.startsWith('k') ? 'keynotes' : NAV_ROUTE[r.kind];
+        const navLink = $(`#main-nav [data-route="${navKey}"]`);
         if (navLink) { navLink.classList.add('is-active'); navLink.setAttribute('aria-current', 'page'); }
 
         if (sameSchedule) { updateSchedule(true); return; }
@@ -181,6 +226,36 @@
         if (big) return `<button type="button" class="btn ${on ? 'btn--outline is-saved' : 'btn--primary'}" data-star="${e.id}" aria-pressed="${on}">${icon('star')}<span>${on ? t().saved : t().save}</span></button>`;
         return `<button type="button" class="star" data-star="${e.id}" aria-pressed="${on}" aria-label="${on ? t().unsave : t().save}: ${esc(pick(e.title))}">${icon('star')}</button>`;
     };
+    // Archivo .ics (Google Calendar, Outlook, Apple Calendar…) con la hora de Bogotá
+    const calBtn = (e) => `<button type="button" class="btn btn--outline" data-ics="${e.id}">${icon('cal')}<span>${t().addCal}</span></button>`;
+    function downloadIcs(e) {
+        const day = D.DAYS[e.day], room = D.ROOMS[e.room];
+        const stamp = (hm) => `202807${day.num}T${hm.replace(':', '')}00`;
+        const txt = (s) => String(s).replace(/\\/g, '\\\\').replace(/[,;]/g, (m) => '\\' + m).replace(/\n/g, '\\n');
+        const who = whoName(e);
+        const ics = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//PyCon Colombia//2028//ES', 'CALSCALE:GREGORIAN',
+            'BEGIN:VTIMEZONE', 'TZID:America/Bogota', 'BEGIN:STANDARD', 'DTSTART:19700101T000000', 'TZOFFSETFROM:-0500', 'TZOFFSETTO:-0500', 'TZNAME:-05', 'END:STANDARD', 'END:VTIMEZONE',
+            'BEGIN:VEVENT', `UID:${e.id}@pycon.co`, `DTSTAMP:${new Date().toISOString().replace(/[-:]/g, '').slice(0, 15)}Z`,
+            `DTSTART;TZID=America/Bogota:${stamp(e.t)}`, `DTEND;TZID=America/Bogota:${stamp(e.end)}`,
+            `SUMMARY:${txt(`PyCon Colombia 2028 · ${pick(e.title)}`)}`,
+            `DESCRIPTION:${txt([who, pick(e.desc || '')].filter(Boolean).join(' — '))}`,
+            `LOCATION:${txt(room ? `${pick(room.name)}, ${pick(room.building)} · Universidad EAFIT, Medellín` : 'Universidad EAFIT, Medellín')}`,
+            'END:VEVENT', 'END:VCALENDAR'].join('\r\n');
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(new Blob([ics], { type: 'text/calendar;charset=utf-8' }));
+        a.download = `pycon-colombia-2028-${e.id}.ics`;
+        document.body.append(a); a.click(); a.remove();
+        setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+    }
+    view.addEventListener('click', (ev) => {
+        const b = ev.target.closest('[data-ics]');
+        if (!b) return;
+        downloadIcs(D.EVENTS[b.dataset.ics]);
+        const note = b.parentElement.querySelector('[data-ics-note]');
+        if (note) note.hidden = false;
+    });
+    const calNote = () => `<p class="muted cal-note" data-ics-note role="status" hidden>${t().calOk}</p>`;
+
     const roomBtn = (e) => (e.room ? `<a class="room-btn" href="#/agenda/evento/${e.id}">${icon('pin')}<span>${esc(roomName(e.room))}</span></a>` : '');
 
     function eventRow(e, { showDay = false } = {}) {
@@ -238,19 +313,74 @@
         ['lang', t().language, D.LANGS], ['room', t().room, Object.fromEntries(Object.entries(D.ROOMS).filter(([k]) => k !== 'plaza').map(([k, r]) => [k, r.name]))]
     ];
     const activeCount = () => Object.values(sched.f).reduce((n, s) => n + s.size, 0);
+    /* --- Búsqueda ---------------------------------------------------------
+       Sin distinguir mayúsculas ni tildes ("STUART", "Stuart" y "stuart" dan lo mismo) y en
+       ambos idiomas (título, ponente, sala, etiquetas y descripción). Todas las palabras de la
+       búsqueda deben aparecer. Si el día elegido no tiene resultados se muestran los de otros
+       días; si no hay en ninguno, sugerencias por parecido (tolera errores de tipeo). */
     const norm = (s) => String(s).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
-    const matches = (e) => {
+    const both = (v) => (v && typeof v === 'object' && !Array.isArray(v) ? Object.values(v).flat().join(' ') : String(v || ''));
+    const bothLabel = (map, k) => (k && map[k] ? both(map[k]) : '');
+    const DOCS = new Map(D.DAYS.flatMap((d) => d.events).map((e) => {
+        const p = person(e.who);
+        const text = [both(e.title), p ? both(p.name) + ' ' + both(p.role) : '', both(D.ROOMS[e.room]?.name), bothLabel(D.TRACKS, e.track),
+            ...(e.also || []).map((k) => bothLabel(D.TRACKS, k)), bothLabel(D.FORMATS, e.format), bothLabel(D.LEVELS, e.level),
+            bothLabel(D.LANGS, e.lang), both(e.desc), both(e.long)].join(' ');
+        const doc = norm(text);
+        return [e.id, { doc, words: [...new Set(doc.split(/[^a-z0-9+#]+/).filter((w) => w.length > 1))] }];
+    }));
+    const tokens = (q) => norm(q).split(/\s+/).filter(Boolean);
+    const passesFilters = (e) => {
         const f = sched.f;
-        const any = activeCount() > 0;
-        if (any && e.format === 'break') return false;
+        if (activeCount() > 0 && e.format === 'break') return false;
         if (f.track.size && !f.track.has(e.track) && !(e.also || []).some((k) => f.track.has(k))) return false;
         if (f.format.size && !f.format.has(e.format)) return false;
         if (f.level.size && !f.level.has(e.level)) return false;
         if (f.lang.size && !f.lang.has(e.lang)) return false;
         if (f.room.size && !f.room.has(e.room)) return false;
-        if (!sched.q) return true;
-        return norm([pick(e.title), whoName(e), roomName(e.room), ...evTags(e)].join(' ')).includes(norm(sched.q));
+        return true;
     };
+    const passesQuery = (e) => { const doc = DOCS.get(e.id).doc; return tokens(sched.q).every((w) => doc.includes(w)); };
+    const matches = (e) => passesFilters(e) && (!sched.q || passesQuery(e));
+
+    // Parecido entre palabras (distancia de edición) para sugerir aunque haya errores de tipeo
+    const editDistance = (a, b) => {
+        const row = Array.from({ length: b.length + 1 }, (_, i) => i);
+        for (let i = 1; i <= a.length; i++) {
+            let prev = row[0]; row[0] = i;
+            for (let j = 1; j <= b.length; j++) {
+                const tmp = row[j];
+                row[j] = Math.min(row[j] + 1, row[j - 1] + 1, prev + (a[i - 1] === b[j - 1] ? 0 : 1));
+                prev = tmp;
+            }
+        }
+        return row[b.length];
+    };
+    function suggest(q, limit = 4) {
+        const qs = tokens(q).filter((w) => w.length > 1);
+        const scored = D.DAYS.flatMap((d) => d.events).filter((e) => e.format !== 'break').map((e) => {
+            const { words } = DOCS.get(e.id);
+            let score = 0;
+            for (const w of qs) {
+                let best = 0;
+                for (const x of words) {
+                    // palabra a medio escribir ("panda" → "pandas")
+                    if (w.length >= 3 && x.startsWith(w)) { best = Math.max(best, 0.9); continue; }
+                    // errores de tipeo: 1 letra en palabras cortas, 2 en las demás ("pandsa" → "pandas")
+                    const tol = w.length <= 4 ? 1 : 2;
+                    if (Math.abs(x.length - w.length) <= tol && editDistance(w, x) <= tol) best = Math.max(best, 0.7);
+                }
+                score += best;
+            }
+            return { e, score };
+        }).filter((s) => s.score > 0).sort((a, b) => b.score - a.score || a.e.day - b.e.day);
+        if (scored.length) return scored.slice(0, limit).map((s) => s.e);
+        // sin parecido: la charla recomendada y las keynotes de la conferencia
+        const keys = D.DAYS.flatMap((d) => d.events).filter((e) => e.format === 'keynote');
+        return [D.EVENTS[D.RECOMMENDED], ...keys].slice(0, limit);
+    }
+    const countsText = (c) => ['keynote', 'talk', 'workshop', 'lightning'].filter((k) => c[k])
+        .map((k) => `${c[k]} ${t().perDay[k][c[k] === 1 ? 0 : 1]}`).join(' · ');
     const dayIndex = () => Math.min(2, Math.max(0, +(current.query.d || 0)));
 
     function renderSchedule() {
@@ -288,12 +418,15 @@
 
                 <div class="days" role="tablist" aria-label="${t().program}">
                     ${D.DAYS.map((d, i) => `<a class="day" role="tab" href="#/agenda?d=${i}" data-day="${i}">
-                        <span>${esc(pick(d.label))}</span><b>${d.num}</b></a>`).join('')}
+                        <span>${esc(pick(d.label))}</span><b>${d.num}</b><small>${t().activities(Object.values(D.COUNTS.days[i]).reduce((a, b) => a + b, 0))}</small></a>`).join('')}
                 </div>
 
                 <div class="inset schedule" role="tabpanel">
                     <div class="schedule__summary">
-                        <h2 data-day-title></h2>
+                        <div>
+                            <h2 data-day-title></h2>
+                            <p class="schedule__mix" data-day-mix></p>
+                        </div>
                         <p class="muted" data-day-count aria-live="polite"></p>
                     </div>
                     <div class="search-row">
@@ -319,7 +452,7 @@
                     </div>
                     <div class="filters" data-chips></div>
                     <ol class="events" data-events></ol>
-                    <p class="events__empty" data-empty hidden>${t().empty}</p>
+                    <div class="events__alt" data-alt hidden aria-live="polite"></div>
                     <div data-pager></div>
                 </div>
             </section>
@@ -381,9 +514,27 @@
         const shown = day.events.filter(matches);
         const { items, page, pages } = paginate(shown, +current.query.p, PAGE_SIZE);
         $('[data-day-title]', view).textContent = pick(day.title);
+        $('[data-day-mix]', view).textContent = countsText(D.COUNTS.days[d]);
         $('[data-day-count]', view).textContent = shown.length === day.events.length ? t().blocks(day.events.length) : t().results(shown.length, day.events.length);
         $('[data-events]', view).innerHTML = items.map((e) => eventRow(e)).join('');
-        $('[data-empty]', view).hidden = shown.length > 0;
+
+        // Sin resultados en este día: otros días que sí coinciden, o sugerencias
+        const alt = $('[data-alt]', view);
+        alt.hidden = shown.length > 0;
+        if (!shown.length) {
+            const dayName = `${pick(day.label).toLowerCase()} ${day.num}`;
+            const others = D.DAYS.flatMap((x) => x.events).filter((e) => e.day !== d && matches(e));
+            if (others.length) {
+                const days = [...new Set(others.map((e) => e.day))];
+                alt.innerHTML = `<p class="events__empty">${esc(sched.q ? t().noDay(sched.q, dayName) : t().noDayF(dayName))} ${t().otherDays(others.length)}</p>
+                    <ol class="events">${others.slice(0, 8).map((e) => eventRow(e, { showDay: true })).join('')}</ol>
+                    <div class="btn-row">${days.map((i) => `<a class="btn btn--outline btn--sm" href="#/agenda?d=${i}">${esc(t().goDay(`${pick(D.DAYS[i].label).toLowerCase()} ${D.DAYS[i].num}`))}</a>`).join('')}</div>`;
+            } else {
+                const q = sched.q || '';
+                alt.innerHTML = `<p class="events__empty">${q ? esc(t().noneAll(q)) : t().empty}</p>
+                    ${q ? `<p class="eyebrow">${t().suggestions}</p><ol class="events">${suggest(q).map((e) => eventRow(e, { showDay: true })).join('')}</ol>` : ''}`;
+            }
+        }
         $('[data-pager]', view).innerHTML = pager(`#/agenda?d=${d}`, page, pages);
         $('[data-mine-count]', view).textContent = A.mine.size;
         $('[data-rec-star]', view).innerHTML = starBtn(D.EVENTS[D.RECOMMENDED]);
@@ -525,7 +676,7 @@
                         <h2 class="sub-h">${t().when}</h2>
                         <p>${icon('cal')}<span>${esc(pick(day.label))} ${day.num} · ${e.t} – ${e.end}</span></p>
                         <p>${icon('pin')}<span>${esc(pick(room.name))} · ${esc(pick(room.building))}</span></p>
-                        ${e.format !== 'break' ? starBtn(e, true) : ''}
+                        ${e.format !== 'break' ? starBtn(e, true) + calBtn(e) + calNote() : ''}
                     </aside>
                 </div>
             </section>
@@ -575,7 +726,7 @@
     /* ---------------------------------------------------------------- */
     function renderTalk(r) {
         const p = A.PEOPLE[r.id], e = D.EVENTS[p.talk], day = D.DAYS[e.day], isKey = r.id.startsWith('k');
-        const back = isKey ? ['#keynotes', t().backKeynotes] : ['#ponentes', t().backSpeakers];
+        const back = isKey ? ['#/keynotes', t().backKeynotes] : ['#ponentes', t().backSpeakers];
         const desc = e.long ? pick(e.long) : [pick(e.desc)];
         view.innerHTML = `<div class="view-wrap">
             ${crumbs([[back[0], back[1], 'back', true]])}
@@ -598,6 +749,8 @@
                         <p>${icon('cal')}<span>${esc(pick(day.label))} ${day.num} · ${e.t} – ${e.end}</span></p>
                         ${roomBtn(e)}
                         ${starBtn(e, true)}
+                        ${calBtn(e)}
+                        ${calNote()}
                     </aside>
                 </div>
 
@@ -608,7 +761,7 @@
                         <h2>${esc(pick(p.name))}</h2>
                         <p class="muted">${esc(pick(p.role))}</p>
                         <p>${esc(pick(p.bio).slice(0, 180))}${pick(p.bio).length > 180 ? '…' : ''}</p>
-                        <ul class="social">${A.socialHTML()}</ul>
+                        <ul class="social">${A.socialHTML(p)}</ul>
                     </div>
                     <button class="btn btn--primary" type="button" data-open-speaker="${p.id}">${t().viewSpeaker}</button>
                 </div>
@@ -622,12 +775,106 @@
     /* ---------------------------------------------------------------- */
     /*  Patrocinador (vista "sponsor" del Figma)                          */
     /* ---------------------------------------------------------------- */
+    /* ---------------------------------------------------------------- */
+    /*  Keynotes (página propia, con más detalle que la tarjeta)          */
+    /* ---------------------------------------------------------------- */
+    function renderKeynotes() {
+        // en el orden en que suceden en la agenda
+        const list = [...D.KEYNOTES].sort((a, b) => { const ea = D.EVENTS[a.talk], eb = D.EVENTS[b.talk]; return ea.day - eb.day || ea.t.localeCompare(eb.t); });
+        view.innerHTML = `<div class="view-wrap">
+            ${crumbs([['#inicio', t().home]])}
+            <header class="card card--frame section-head">
+                <p class="eyebrow">Keynotes</p>
+                <h1 class="title title--xl">${t().kTitle}</h1>
+                <p>${esc(t().kLead(list.length, D.DAYS.length))}</p>
+            </header>
+            <ul class="keynote-list">${list.map((p) => {
+                const e = D.EVENTS[p.talk], day = D.DAYS[e.day], room = D.ROOMS[e.room];
+                return `<li class="card keynote-card${p.tba ? ' keynote-card--tba' : ''}">
+                    <div class="keynote-card__photo">${A.avatarHTML(p)}</div>
+                    <div class="keynote-card__body">
+                        <p class="eyebrow">${esc(pick(day.label))} ${day.num} · ${e.t} – ${e.end}</p>
+                        <h2 class="keynote-card__name">${esc(pick(p.name))}</h2>
+                        <p class="muted keynote-card__role">${esc(pick(p.role))}</p>
+                        <p>${esc(pick(p.bio))}</p>
+                        <div class="inset keynote-card__talk">
+                            <p class="inset__label">${t().talkLabel}</p>
+                            <h3><a href="#/charla/${p.id}">${esc(pick(e.title))}</a></h3>
+                            <p class="muted">${icon('pin')} ${esc(pick(room.name))} · ${esc(pick(room.building))}</p>
+                            <ul class="tags">${evTags(e).map((x) => `<li class="tag">${esc(x)}</li>`).join('')}</ul>
+                        </div>
+                        <div class="keynote-card__actions">
+                            <div class="btn-row">
+                                <a class="btn btn--primary" href="#/charla/${p.id}">${t().viewTalkShort}</a>
+                                <button class="btn btn--outline" type="button" data-open-speaker="${p.id}">${t().viewProfile}</button>
+                            </div>
+                            <ul class="social">${A.socialHTML(p)}</ul>
+                        </div>
+                    </div>
+                </li>`;
+            }).join('')}</ul>
+        </div>`;
+    }
+
+    /* ---------------------------------------------------------------- */
+    /*  Patrocinadores (página propia, mismo contenido que tenía la landing) */
+    /* ---------------------------------------------------------------- */
+    function renderSponsors() {
+        view.innerHTML = `<div class="view-wrap">
+            ${crumbs([['#inicio', t().home]])}
+            <section class="card card--frame sponsors">
+                <h1 class="title title--xl">${t().spoTitle}</h1>
+                <p class="sponsors__lead">${t().spoLead}</p>
+                <a class="btn btn--primary" href="mailto:sponsors@pycon.co">${t().spoBtn}</a>
+                ${D.TIERS.map(([tier, lab]) => {
+                    const list = D.SPONSORS.filter((s) => s.tier === tier);
+                    return `<h2 class="tier"><span>${esc(pick(lab))}</span></h2>
+                        <ul class="logos logos--${tier}">${list.map((s) => `
+                            <li><a class="inset sponsor-card" href="#/patrocinador/${s.id}">
+                                ${A.logoHTML(s)}<span class="sponsor-card__name">${esc(s.name)}</span>
+                                <span class="sponsor-card__more">${t().sponsorOf} ${icon('next')}</span>
+                            </a></li>`).join('')}</ul>`;
+                }).join('')}
+            </section>
+        </div>`;
+    }
+
+    /* ---------------------------------------------------------------- */
+    /*  Red social sin enlace todavía                                     */
+    /* ---------------------------------------------------------------- */
+    function renderAccount(r) {
+        const p = A.PEOPLE[r.id], net = A.SOCIAL_NAMES[r.net];
+        const isKey = p && r.id.startsWith('k');
+        view.innerHTML = `<div class="view-wrap view-wrap--narrow">
+            ${crumbs([[isKey ? '#/keynotes' : '#ponentes', t().goBack, 'back', true]])}
+            <section class="card card--frame account">
+                <div class="account__head">
+                    ${p ? `<div class="account__photo">${A.avatarHTML(p)}</div>` : ''}
+                    <span class="account__net">${icon(r.net)}</span>
+                </div>
+                <p class="eyebrow eyebrow--center">${esc(net)}</p>
+                <h1 class="title">${t().accTitle}</h1>
+                <p class="account__lead">${esc(p ? t().accP(net, pick(p.name)) : t().accPycon(net))}</p>
+                <div class="btn-row btn-row--center">
+                    <a class="btn btn--primary" href="${isKey ? '#/keynotes' : '#ponentes'}" data-back>${icon('back')}<span>${t().goBack}</span></a>
+                    <a class="btn btn--outline" href="${isKey ? '#/keynotes' : '#ponentes'}">${isKey ? t().seeKeynotes : t().seeSpeakers}</a>
+                </div>
+            </section>
+        </div>`;
+        view.querySelector('.crumbs a')?.setAttribute('data-back', '');
+    }
+    // "Volver": regresa a donde estaba la persona (perfil, keynotes…); si entró directo, al enlace del botón
+    view.addEventListener('click', (ev) => {
+        const b = ev.target.closest('[data-back]');
+        if (b && history.length > 1) { ev.preventDefault(); history.back(); }
+    });
+
     function renderSponsor(r) {
         const s = D.SPONSORS.find((x) => x.id === r.id);
         const tier = pick(D.TIERS.find(([k]) => k === s.tier)[1]);
         const url = s.url || 'https://www.example.com';
         view.innerHTML = `<div class="view-wrap">
-            ${crumbs([['#patrocinadores', t().backSponsors, 'back', true]])}
+            ${crumbs([['#/patrocinadores', t().backSponsors, 'back', true]])}
             <article class="card card--frame sponsor-page">
                 <p class="sponsor-page__tier">${esc(tier)}</p>
                 <div class="inset sponsor-page__logo">${A.logoHTML(s, true)}</div>
@@ -637,7 +884,7 @@
                 <p class="sponsor-page__lead">${esc(pick(s.about))}</p>
                 <div class="btn-row btn-row--center">
                     <a class="btn btn--primary" href="${esc(url)}" target="_blank" rel="noopener">${icon('ext')}<span>${t().visit}</span></a>
-                    <a class="btn btn--outline" href="#patrocinadores">${icon('back')}<span>${t().backSponsors}</span></a>
+                    <a class="btn btn--outline" href="#/patrocinadores">${icon('back')}<span>${t().backSponsors}</span></a>
                 </div>
                 <p class="sponsor-page__more">${esc(pick(s.more))}</p>
                 <p class="eyebrow eyebrow--center">${t().videos}</p>
@@ -645,7 +892,7 @@
                     <button type="button" aria-label="${t().videos} ${n} · ${esc(s.name)}">${icon('play')}</button></li>`).join('')}</ul>
                 <div class="btn-row btn-row--center">
                     <a class="btn btn--primary" href="mailto:sponsors@pycon.co">${t().becomeSponsor}</a>
-                    <a class="btn btn--outline" href="#patrocinadores">${t().backSponsors}</a>
+                    <a class="btn btn--outline" href="#/patrocinadores">${t().backSponsors}</a>
                 </div>
             </article>
         </div>`;
@@ -660,8 +907,12 @@
             <article class="card card--frame doc">
                 <p class="eyebrow">PyCon Colombia 2028</p>
                 <h1 class="title title--xl">${t().cocTitle}</h1>
-                <p class="doc__intro">${t().cocIntro}</p>
-                ${D.COC[A.lang].map(([h, p], i) => `<section><h2><span>${String(i + 1).padStart(2, '0')}</span>${esc(h)}</h2><p>${esc(p)}</p></section>`).join('')}
+                <div lang="en">
+                ${D.COC.map(([h, paras, bullets, after], i) => `<section><h2><span>${String(i + 1).padStart(2, '0')}</span>${esc(h)}</h2>
+                    ${paras.map((x) => `<p>${esc(x)}</p>`).join('')}
+                    ${bullets ? `<ul class="doc__list">${bullets.map((x) => `<li>${esc(x)}</li>`).join('')}</ul>` : ''}
+                    ${(after || []).map((x) => `<p>${esc(x)}</p>`).join('')}</section>`).join('')}
+                </div>
                 <div class="inset doc__cta">
                     <h2>${t().reportQ}</h2>
                     <p>${t().reportP}</p>
