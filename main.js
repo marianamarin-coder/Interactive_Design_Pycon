@@ -19,6 +19,8 @@
         'skip': 'Skip to content', 'menu': 'Menu', 'toTop': 'Back to top',
         'nav.home': 'Home', 'nav.scheduleGo': 'Schedule', 'nav.speakers': 'Speakers', 'nav.schedule': 'Schedule', 'nav.sponsors': 'Sponsors', 'nav.venue': 'Venue', 'nav.coc': 'Code of conduct',
         'cta.buy': 'Buy ticket', 'cta.tickets': 'Get your ticket', 'cta.speakers': 'Meet the speakers',
+        'hero.whatTitle': 'What is PyCon?',
+        'hero.what': 'The annual conference of the Python community in Colombia: 3 days of talks, workshops and keynotes to learn, share and connect. Non-profit, run by volunteers and open to every level, from people writing their first line of code to experts.',
         'hero.city': 'City', 'hero.dateLabel': 'Date', 'hero.date': 'July 14 – 16, 2028', 'scroll': 'Explore the jungle',
         'about.kicker': 'About the conference', 'about.title': 'A community that grows like the rainforest',
         'about.p1': 'PyCon Colombia is a non-profit conference organized by volunteers from the Python community. Every year we bring together developers, data scientists, students and teachers to learn, share and connect.',
@@ -335,24 +337,3 @@
 
     if (store.get('pycon-lang') === 'en') setLang('en');
 })();
-
-/*Boton deshabilitado*/
-
-const boton = document.getElementById('mentoria');
-
-boton.addEventListener('click', function(evento) {
-  // Verificamos si el botón tiene la clase de deshabilitado
-  if (boton.classList.contains('btn-deshabilitado')) {
-    // Evitamos cualquier acción por defecto
-    evento.preventDefault(); 
-    
-    // Mostramos el aviso de advertencia
-    alert('Convocatoria cerrada.');
-    
-    return; // Detiene la función aquí
-  }
-
-  // Código que se ejecuta si el botón SÍ está habilitado de verdad
-  console.log('¡Formulario enviado con éxito!');
-});
-

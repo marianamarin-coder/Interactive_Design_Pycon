@@ -62,7 +62,25 @@
             minChars: (min, n) => (n >= min ? `${n} caracteres ✓` : `${n} de ${min} caracteres mínimos`),
             tooShort: (min) => `Cuéntanos un poco más (mínimo ${min} caracteres).`,
             travel: 'Necesito apoyo de viaje y hospedaje', sendGrant: 'Enviar aplicación',
-            grantOk: (n, r) => `¡Gracias, ${n}! Recibimos tu aplicación a beca (referencia ${r}). Te daremos respuesta por correo en un máximo de 3 semanas.`,            cocAgree: 'Leí y acepto el código de conducta *', register: 'Enviar registro', volOk: (n) => `¡Gracias, ${n}! Recibimos tu registro como voluntario. Pronto te escribiremos 🌿`,
+            grantOk: (n, r) => `¡Gracias, ${n}! Recibimos tu aplicación a beca (referencia ${r}). Te daremos respuesta por correo en un máximo de 3 semanas.`,
+            propTitle: 'Envía tu propuesta', propKicker: 'Convocatoria abierta', backCfp: 'Volver a la convocatoria',
+            propLead: 'Cuéntanos qué te gustaría compartir con la comunidad. El comité revisa todas las propuestas y responde por correo; si es tu primera charla, te acompañamos con mentoría.',
+            aboutYou: 'Sobre ti', aboutTalk: 'Sobre tu propuesta', talkTitle: 'Título de la propuesta', formatQ: 'Formato',
+            propFormats: { talk: 'Charla (30 min)', workshop: 'Taller (2 h)', lightning: 'Lightning talk (5 min)' },
+            abstract: 'Resumen para el público (aparecerá en la agenda)', notes: 'Notas para el comité (opcional): ¿qué hace especial tu propuesta?',
+            bioQ: 'Biografía corta (opcional)', firstTalk: 'Es mi primera charla en un evento', wantMentor: 'Me gustaría recibir mentoría para preparar la charla',
+            sendProp: 'Enviar propuesta',
+            propOk: (n, r) => `¡Gracias, ${n}! Recibimos tu propuesta (referencia ${r}). El comité la revisará y te responderá por correo en un máximo de 4 semanas.`,
+            mentTitle: 'Solicita mentoría', mentKicker: 'Mentoría para ponentes',
+            mentLead: 'Una persona con experiencia en charlas te acompaña a definir tu idea, escribir la propuesta y ensayar. Es gratis y pensada especialmente para quienes nunca han dado una charla.',
+            helpQ: '¿En qué necesitas ayuda?', helpOpts: ['Definir el tema y escribir la propuesta', 'Preparar las diapositivas y ensayar', 'Todo el proceso, de la idea a la charla'],
+            topicQ: 'Tema o idea tentativa de tu charla', expQ: 'Experiencia hablando en público',
+            expOpts: ['Nunca he dado una charla', 'He hablado en clases o reuniones pequeñas', 'Ya he dado charlas en eventos'],
+            availQ: 'Disponibilidad para reuniones (opcional)', availPh: 'Ej.: martes y jueves en la noche', msgQ: 'Algo más que quieras contarnos (opcional)',
+            sendMent: 'Solicitar mentoría',
+            mentOk: (n, r) => `¡Gracias, ${n}! Recibimos tu solicitud de mentoría (referencia ${r}). En menos de una semana te escribiremos para presentarte a tu mentor o mentora.`,
+            pick: 'Elige una opción',
+            cocAgree: 'Leí y acepto el código de conducta *', register: 'Enviar registro', volOk: (n) => `¡Gracias, ${n}! Recibimos tu registro como voluntario. Pronto te escribiremos 🌿`,
             emailErr: 'Escribe un correo válido.', backHome: 'Volver al inicio', newReport: 'Enviar otro reporte',
             viewTalkShort: 'Ver charla', viewProfile: 'Ver perfil', talkLabel: 'Charla',
             spoTitle: 'Con el respaldo de líderes de la industria', spoBtn: 'Sé patrocinador',
@@ -121,7 +139,25 @@
             minChars: (min, n) => (n >= min ? `${n} characters ✓` : `${n} of ${min} minimum characters`),
             tooShort: (min) => `Tell us a bit more (at least ${min} characters).`,
             travel: 'I need travel and lodging support', sendGrant: 'Send application',
-            grantOk: (n, r) => `Thank you, ${n}! We received your grant application (reference ${r}). We will reply by email within 3 weeks.`,            cocAgree: 'I have read and accept the code of conduct *', register: 'Send registration', volOk: (n) => `Thank you, ${n}! We received your volunteer registration. We will write to you soon 🌿`,
+            grantOk: (n, r) => `Thank you, ${n}! We received your grant application (reference ${r}). We will reply by email within 3 weeks.`,
+            propTitle: 'Submit your proposal', propKicker: 'Call for proposals open', backCfp: 'Back to the call for proposals',
+            propLead: 'Tell us what you would like to share with the community. The committee reviews every proposal and replies by email; if it is your first talk, we will support you with mentoring.',
+            aboutYou: 'About you', aboutTalk: 'About your proposal', talkTitle: 'Proposal title', formatQ: 'Format',
+            propFormats: { talk: 'Talk (30 min)', workshop: 'Workshop (2 h)', lightning: 'Lightning talk (5 min)' },
+            abstract: 'Abstract for the audience (it will appear in the schedule)', notes: 'Notes for the committee (optional): what makes your proposal special?',
+            bioQ: 'Short bio (optional)', firstTalk: 'This is my first talk at an event', wantMentor: 'I would like mentoring to prepare the talk',
+            sendProp: 'Submit proposal',
+            propOk: (n, r) => `Thank you, ${n}! We received your proposal (reference ${r}). The committee will review it and reply by email within 4 weeks.`,
+            mentTitle: 'Request mentoring', mentKicker: 'Speaker mentoring',
+            mentLead: 'An experienced speaker helps you shape your idea, write the proposal and rehearse. It is free and designed especially for people who have never given a talk.',
+            helpQ: 'What do you need help with?', helpOpts: ['Choosing the topic and writing the proposal', 'Preparing the slides and rehearsing', 'The whole process, from idea to talk'],
+            topicQ: 'Tentative topic or idea for your talk', expQ: 'Public speaking experience',
+            expOpts: ['I have never given a talk', 'I have spoken in classes or small meetings', 'I have given talks at events'],
+            availQ: 'Availability for meetings (optional)', availPh: 'E.g.: Tuesday and Thursday evenings', msgQ: 'Anything else you want to tell us (optional)',
+            sendMent: 'Request mentoring',
+            mentOk: (n, r) => `Thank you, ${n}! We received your mentoring request (reference ${r}). Within a week we will write to introduce you to your mentor.`,
+            pick: 'Choose an option',
+            cocAgree: 'I have read and accept the code of conduct *', register: 'Send registration', volOk: (n) => `Thank you, ${n}! We received your volunteer registration. We will write to you soon 🌿`,
             emailErr: 'Please enter a valid email.', backHome: 'Back to home', newReport: 'Send another report',
             viewTalkShort: 'View talk', viewProfile: 'View profile', talkLabel: 'Talk',
             spoTitle: 'Trusted by industry leaders', spoBtn: 'Become a sponsor',
@@ -169,10 +205,12 @@
         if (parts[0] === 'codigo-de-conducta') return { kind: 'coc' };
         if (parts[0] === 'voluntariado') return { kind: 'volunteer' };
         if (parts[0] === 'beca') return { kind: 'grant' };
+        if (parts[0] === 'propuesta') return { kind: 'proposal' };
+        if (parts[0] === 'mentoria') return { kind: 'mentor' };
         return { kind: 'notfound' };
     }
 
-    const RENDER = { schedule: renderSchedule, mine: renderMine, event: renderEvent, talk: renderTalk, sponsors: renderSponsors, sponsor: renderSponsor, account: renderAccount, coc: renderCoc, report: renderReport, volunteer: renderVolunteer, grant: renderGrant, notfound: renderNotFound };
+    const RENDER = { schedule: renderSchedule, mine: renderMine, event: renderEvent, talk: renderTalk, sponsors: renderSponsors, sponsor: renderSponsor, account: renderAccount, coc: renderCoc, report: renderReport, volunteer: renderVolunteer, grant: renderGrant, proposal: renderProposal, mentor: renderMentor, notfound: renderNotFound };
     const NAV_ROUTE = { schedule: 'agenda', mine: 'agenda', event: 'agenda', sponsors: 'patrocinadores', sponsor: 'patrocinadores', coc: 'codigo-de-conducta', report: 'codigo-de-conducta' };
 
     function route() {
@@ -1079,6 +1117,135 @@
             box.hidden = false;
             box.innerHTML = `<p>${esc(t().grantOk(name.value.trim().split(' ')[0], ref))}</p><div class="btn-row"><a class="btn btn--primary" href="#inicio">${t().backHome}</a><a class="btn btn--outline" href="#/agenda">${t().goSchedule}</a></div>`;
             box.tabIndex = -1; box.focus();
+        });
+    }
+
+    /* ---------------------------------------------------------------- */
+    /*  Convocatoria: enviar propuesta y solicitar mentoría               */
+    /*  (botones de la tarjeta "Comparte lo que sabes")                   */
+    /* ---------------------------------------------------------------- */
+    const selectField = (id, lab, opts, req = true) => `<div class="field"><label for="${id}">${esc(lab)}${req ? ' *' : ''}</label>
+        <select id="${id}" name="${id}"${req ? ' required' : ''}><option value="">${t().pick}</option>${opts.map(([v, l]) => `<option value="${esc(v)}">${esc(l)}</option>`).join('')}</select>
+        <p class="field__err" id="${id}-err" hidden></p></div>`;
+    const textareaCount = (id, lab, min, rows = 5) => `<div class="field">
+        <label for="${id}">${esc(lab)} *</label>
+        <textarea id="${id}" name="${id}" rows="${rows}" required aria-describedby="${id}-count"></textarea>
+        <p class="field__hint" id="${id}-count">${t().minChars(min, 0)}</p>
+        <p class="field__err" id="${id}-err" hidden></p></div>`;
+    const cocCheck = (id) => `<label class="check check--box"><input type="checkbox" id="${id}"><span>${t().cocAgree.replace(/código de conducta|code of conduct/i, (m) => `<a href="#/codigo-de-conducta" target="_blank">${m}</a>`)}</span></label>
+        <p class="field__err" id="${id}-err" hidden></p>`;
+    const ref = (prefix) => `${prefix}-${Math.random().toString(36).slice(2, 7).toUpperCase()}`;
+    // Valida los campos comunes y los textos con mínimo de caracteres; devuelve true si todo está bien
+    function validate(form, { required = [], selects = [], counted = [], email, coc }) {
+        let ok = true;
+        required.forEach((id) => { ok = setErr(form, id, $(`#${id}`, form).value.trim() ? '' : t().required) && ok; });
+        if (email) {
+            const el = $(`#${email}`, form);
+            ok = setErr(form, email, !el.value.trim() ? t().required : el.checkValidity() ? '' : t().emailErr) && ok;
+        }
+        selects.forEach((id) => { ok = setErr(form, id, $(`#${id}`, form).value ? '' : t().required) && ok; });
+        counted.forEach(([id, min]) => { const n = $(`#${id}`, form).value.trim().length; ok = setErr(form, id, !n ? t().required : n < min ? t().tooShort(min) : '') && ok; });
+        if (coc) ok = setErr(form, coc, $(`#${coc}`, form).checked ? '' : t().required) && ok;
+        if (!ok) form.querySelector('[aria-invalid="true"]')?.focus();
+        return ok;
+    }
+    function liveCounters(form, counted) {
+        counted.forEach(([id, min]) => { const el = $(`#${id}`, form), out = $(`#${id}-count`, form); el.addEventListener('input', () => { out.textContent = t().minChars(min, el.value.trim().length); }); });
+    }
+    function showOk(form, msg) {
+        form.hidden = true;
+        const box = $('[data-ok]', view);
+        box.hidden = false;
+        box.innerHTML = `<p>${esc(msg)}</p><div class="btn-row"><a class="btn btn--primary" href="#comunidad">${t().backCfp}</a><a class="btn btn--outline" href="#inicio">${t().backHome}</a></div>`;
+        box.tabIndex = -1; box.focus();
+    }
+
+    const ABSTRACT_MIN = 150, TOPIC_MIN = 30;
+    function renderProposal() {
+        const opts = (map) => Object.keys(map).map((k) => [k, label(map, k)]);
+        view.innerHTML = `<div class="view-wrap view-wrap--narrow">
+            ${crumbs([['#comunidad', t().backCfp, 'back', true]])}
+            <section class="card card--frame">
+                <p class="eyebrow">${t().propKicker}</p>
+                <h1 class="title">${t().propTitle}</h1>
+                <p class="muted">${t().propLead}</p>
+                <form class="form" novalidate data-proposal>
+                    <h2 class="sub-h">${t().aboutYou}</h2>
+                    <div class="form__row">
+                        ${field('p-name', t().fullName + ' *', 'text', 'required autocomplete="name"')}
+                        ${field('p-email', t().email + ' *', 'email', 'required autocomplete="email"')}
+                    </div>
+                    ${field('p-bio', t().bioQ, 'textarea')}
+                    <h2 class="sub-h">${t().aboutTalk}</h2>
+                    ${field('p-title', t().talkTitle + ' *', 'text', 'required')}
+                    <div class="form__row">
+                        ${selectField('p-format', t().formatQ, Object.entries(t().propFormats))}
+                        ${selectField('p-track', 'Track', opts(D.TRACKS))}
+                    </div>
+                    <div class="form__row">
+                        ${selectField('p-level', t().level, opts(D.LEVELS))}
+                        ${selectField('p-lang', t().language, opts(D.LANGS))}
+                    </div>
+                    ${textareaCount('p-abstract', t().abstract, ABSTRACT_MIN, 6)}
+                    ${field('p-notes', t().notes, 'textarea')}
+                    <label class="check check--box"><input type="checkbox" id="p-first"><span>${t().firstTalk}</span></label>
+                    <label class="check check--box"><input type="checkbox" id="p-mentor"><span>${t().wantMentor}</span></label>
+                    ${cocCheck('p-coc')}
+                    <div class="btn-row">
+                        <button class="btn btn--primary" type="submit">${t().sendProp}</button>
+                        <a class="btn btn--outline" href="#/mentoria">${t().mentTitle}</a>
+                    </div>
+                </form>
+                <div class="inset form-ok" data-ok hidden role="status"></div>
+            </section>
+        </div>`;
+        const form = $('[data-proposal]', view), counted = [['p-abstract', ABSTRACT_MIN]];
+        liveCounters(form, counted);
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            if (!validate(form, { required: ['p-name', 'p-title'], email: 'p-email', selects: ['p-format', 'p-track', 'p-level', 'p-lang'], counted, coc: 'p-coc' })) return;
+            showOk(form, t().propOk($('#p-name', form).value.trim().split(' ')[0], ref('PROP')));
+        });
+    }
+
+    function renderMentor() {
+        const list = (arr) => arr.map((x) => [x, x]);
+        view.innerHTML = `<div class="view-wrap view-wrap--narrow">
+            ${crumbs([['#comunidad', t().backCfp, 'back', true]])}
+            <section class="card card--frame">
+                <p class="eyebrow">${t().mentKicker}</p>
+                <h1 class="title">${t().mentTitle}</h1>
+                <p class="muted">${t().mentLead}</p>
+                <form class="form" novalidate data-mentor>
+                    <h2 class="sub-h">${t().aboutYou}</h2>
+                    <div class="form__row">
+                        ${field('m-name', t().fullName + ' *', 'text', 'required autocomplete="name"')}
+                        ${field('m-email', t().email + ' *', 'email', 'required autocomplete="email"')}
+                    </div>
+                    <div class="form__row">
+                        ${field('m-city', t().cityCountry, 'text', 'autocomplete="address-level2"')}
+                        ${selectField('m-exp', t().expQ, list(t().expOpts))}
+                    </div>
+                    <h2 class="sub-h">${t().aboutTalk}</h2>
+                    ${selectField('m-help', t().helpQ, list(t().helpOpts))}
+                    ${textareaCount('m-topic', t().topicQ, TOPIC_MIN, 4)}
+                    ${field('m-avail', t().availQ, 'text', `placeholder="${esc(t().availPh)}"`)}
+                    ${field('m-msg', t().msgQ, 'textarea')}
+                    ${cocCheck('m-coc')}
+                    <div class="btn-row">
+                        <button class="btn btn--primary" type="submit">${t().sendMent}</button>
+                        <a class="btn btn--outline" href="#/propuesta">${t().sendProp}</a>
+                    </div>
+                </form>
+                <div class="inset form-ok" data-ok hidden role="status"></div>
+            </section>
+        </div>`;
+        const form = $('[data-mentor]', view), counted = [['m-topic', TOPIC_MIN]];
+        liveCounters(form, counted);
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            if (!validate(form, { required: ['m-name'], email: 'm-email', selects: ['m-exp', 'm-help'], counted, coc: 'm-coc' })) return;
+            showOk(form, t().mentOk($('#m-name', form).value.trim().split(' ')[0], ref('MEN')));
         });
     }
 

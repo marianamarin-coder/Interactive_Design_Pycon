@@ -30,7 +30,7 @@
     </script>
     <!-- ?v=… obliga al navegador a descargar la versión nueva (GitHub Pages deja usar la vieja
          hasta 10 min). Al subir cambios, sube este número aquí y en los <script> del final -->
-    <link rel="stylesheet" href="styles.css?v=1.2">
+    <link rel="stylesheet" href="styles.css?v=1.4">
 
     <script type="importmap">
     {
@@ -135,8 +135,14 @@
                     </p>
                 </div>
 
+                <!-- Qué es PyCon, en dos líneas, para quien llega por primera vez (bajo ciudad y fecha) -->
+                <div class="hero__intro glass">
+                    <p class="hero__intro-title" data-i18n="hero.whatTitle">¿Qué es PyCon?</p>
+                    <p data-i18n="hero.what">La conferencia anual de la comunidad Python en Colombia: 3 días de charlas, talleres y keynotes para aprender, compartir y conectar. Sin ánimo de lucro, hecha por voluntarios y abierta a todos los niveles, desde quien escribe su primera línea de código hasta expertos.</p>
+                </div>
+
                 <div class="hero__ctas">
-                    <a class="btn btn--primary" href="#boletas" data-i18n="cta.tickets" >Obtén tu boleta</a>
+                    <a class="btn btn--primary" href="#boletas" >Obtén tu boleta</a>
                     <a class="btn btn--glass glass" href="#ponentes" data-i18n="cta.speakers">Conoce a los ponentes</a>
                 </div>
             </div>
@@ -283,8 +289,8 @@
                     <h2 class="title" data-i18n="cfp.title">Comparte lo que sabes</h2>
                     <p data-i18n="cfp.p">Buscamos charlas, talleres y lightning talks sobre web, datos, IA, educación, ciencia y comunidad. Si es tu primera charla, te acompañamos con mentorías.</p>
                     <div class="btn-row">
-                        <a class="btn btn--primary" href="" data-i18n="cfp.btn" class="btn-deshabilitado" id="propuesta">Enviar propuesta</a>
-                        <a class="btn btn--outline" href="" data-i18n="cfp.mentor" class="btn-deshabilitado" id="mentoria">Quiero mentoría</a>
+                        <a class="btn btn--primary" href="#/propuesta" data-i18n="cfp.btn">Enviar propuesta</a>
+                        <a class="btn btn--outline" href="#/mentoria" data-i18n="cfp.mentor">Quiero mentoría</a>
                     </div>
                 </article>
                 <article class="card card--frame reveal" id="voluntariado">
@@ -446,9 +452,9 @@
         }
     </script>
     <!-- misma versión que styles.css (arriba): súbela en todos al publicar cambios -->
-    <script src="data.js?v=1.2"></script>
-    <script src="main.js?v=1.2"></script>
-    <script src="views.js?v=1.2"></script>
-    <script type="module" src="tour3d.js?v=1.2"></script>
+    <script src="data.js?v=1.4"></script>
+    <script src="main.js?v=1.4"></script>
+    <script src="views.js?v=1.4"></script>
+    <script type="module" src="tour3d.js?v=1.4"></script>
 </body>
 </html>

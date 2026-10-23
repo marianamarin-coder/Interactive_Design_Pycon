@@ -118,8 +118,9 @@ button { font: inherit; color: inherit; }
     }
 }
 @media (max-width: 720px) {
-    /* en el móvil el aviso queda centrado, por encima de "Explora la selva" */
-    .tour-status.glass { left: 50%; bottom: 84px; translate: -50% 0; max-width: calc(100vw - 32px); font-size: .75rem; padding: 7px 12px; gap: 8px; }
+    /* en el móvil el aviso queda arriba, bajo los botones de menú e idioma (abajo tapaba los botones del inicio) */
+    .tour-status.glass { left: 50%; top: 70px; bottom: auto; translate: -50% 0; max-width: calc(100vw - 32px); white-space: nowrap; font-size: .72rem; padding: 6px 12px; gap: 8px; }
+    .in-view .tour-status.glass { top: calc(var(--header-h) + 18px); }
     .tour-status__bar { width: 40px; }
 }
 
@@ -371,8 +372,26 @@ main { position: relative; z-index: 1; }
     50% { transform: translateY(-18px) rotate(.4deg); }
 }
 
+/* Tarjeta breve "¿Qué es PyCon?" bajo el logo */
+.hero__intro {
+    max-width: 640px; margin-top: clamp(18px, 3vh, 26px); padding: 16px 24px 18px;
+    border-radius: 22px; text-align: center; color: var(--ink);
+}
+.hero__intro p { margin: 0; font-size: .98rem; line-height: 1.55; }
+.hero__intro .hero__intro-title {
+    margin-bottom: 6px; font-size: .78rem; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--teal-ink);
+}
+@media (max-width: 720px) {
+    /* en el móvil todo el inicio (logo, tarjeta, datos y botones) cabe en la primera pantalla */
+    .hero { padding-top: 76px; padding-bottom: 96px; }
+    .hero__intro { margin-top: 14px; padding: 12px 16px 14px; }
+    .hero__intro p { font-size: .88rem; line-height: 1.5; }
+    .hero__chips { margin-top: 20px !important; gap: 8px; }
+    .hero__ctas { margin-top: 16px; gap: 10px; }
+}
+
 .hero__chips {
-    width: 100%; margin-top: clamp(48px, 7vh, 72px);
+    width: 100%; margin-top: clamp(36px, 6vh, 60px);
     display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap;
 }
 .chip {
